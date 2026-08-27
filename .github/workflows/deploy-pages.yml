@@ -21,14 +21,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract PWA webroot
+      - name: Rebuild PWA webroot
         run: |
+          cat bundle/site.b64.* | base64 --decode > site-rebuilt.zip
+          unzip -tq site-rebuilt.zip
           rm -rf dist
           mkdir -p dist
-          unzip -q site.zip -d dist
+          unzip -q site-rebuilt.zip -d dist
           test -f dist/index.html
           test -f dist/manifest.webmanifest
           test -f dist/service-worker.js
+          test -f dist/icon-192.png
+          test -f dist/icon-512.png
+          test -f dist/apple-touch-icon.png
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
