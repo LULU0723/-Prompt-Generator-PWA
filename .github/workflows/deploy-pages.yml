@@ -23,7 +23,7 @@ jobs:
 
       - name: Rebuild PWA webroot
         run: |
-          cat bundle/site.b64.* | base64 --decode > site-rebuilt.zip
+          cat bundle/site.b64.00 bundle/site.b64.01 bundle/site.b64.02 bundle/site.b64.03 bundle/site.b64.04 bundle/site.b64.05a bundle/site.b64.05b bundle/site.b64.06 bundle/site.b64.07 | base64 --decode > site-rebuilt.zip
           unzip -tq site-rebuilt.zip
           rm -rf dist
           mkdir -p dist
