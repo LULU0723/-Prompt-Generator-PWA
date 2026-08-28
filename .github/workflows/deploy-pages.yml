@@ -1,4 +1,4 @@
-name: Materialize and deploy Prompt Generator PWA
+name: Deploy Prompt Generator PWA to Pages
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -21,56 +21,22 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout source
+      - name: Checkout webroot
         uses: actions/checkout@v4
-        with:
-          ref: main
 
-      - name: Rebuild frozen PWA webroot
+      - name: Verify published source
         run: |
-          cat \
-            bundle/site.b64.00 \
-            bundle/site.b64.01a \
-            bundle/site.b64.01b \
-            bundle/site.b64.02 \
-            bundle/site.b64.03 \
-            bundle/site.b64.04 \
-            bundle/site.b64.05a \
-            bundle/site.b64.05b \
-            bundle/site.b64.06 \
-            bundle/site.b64.07 \
-            | base64 --decode > site-rebuilt.zip
-          unzip -tq site-rebuilt.zip
-          rm -rf dist
-          mkdir -p dist
-          unzip -q site-rebuilt.zip -d dist
-
-      - name: Apply V1.0.3 mobile vocabulary chip UI
-        run: |
-          python scripts/patch-mobile-chips.py
-          grep -q 'V1.0.3 PWA' dist/index.html
-          grep -q 'trait-preset-chip' dist/index.html
-          grep -q 'relationshipTypeChips' dist/index.html
-          ! grep -q '<datalist id="trait-' dist/index.html
-          grep -q 'adult-prompt-generator-pwa-v1-0-3' dist/service-worker.js
-
-      - name: Materialize published webroot into main
-        run: |
-          cp dist/index.html ./index.html
-          cp dist/manifest.webmanifest ./manifest.webmanifest
-          cp dist/service-worker.js ./service-worker.js
-          cp dist/icon-192.png ./icon-192.png
-          cp dist/icon-512.png ./icon-512.png
-          cp dist/apple-touch-icon.png ./apple-touch-icon.png
-          touch .nojekyll
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html manifest.webmanifest service-worker.js icon-192.png icon-512.png apple-touch-icon.png .nojekyll
-          if ! git diff --cached --quiet; then
-            git commit -m "Materialize PWA V1.0.3 webroot"
-            git push origin main
-          fi
+          test -f index.html
+          test -f manifest.webmanifest
+          test -f service-worker.js
+          test -f icon-192.png
+          test -f icon-512.png
+          test -f apple-touch-icon.png
+          grep -q 'V1.0.3 PWA' index.html
+          grep -q 'trait-preset-chip' index.html
+          grep -q 'relationshipTypeChips' index.html
+          ! grep -q '<datalist id="trait-' index.html
+          grep -q 'adult-prompt-generator-pwa-v1-0-3' service-worker.js
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -78,7 +44,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: .
 
       - name: Deploy to GitHub Pages
         id: deployment
