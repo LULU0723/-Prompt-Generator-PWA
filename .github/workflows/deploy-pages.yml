@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -21,25 +21,38 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout webroot
+      - name: Checkout source
         uses: actions/checkout@v4
+        with:
+          ref: main
 
-      - name: Verify V1.1 dictionary source
+      - name: Materialize V1.2 composer source
+        run: |
+          python scripts/upgrade-composer-v1_2.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if ! git diff --cached --quiet; then
+            git commit -m "Materialize PWA V1.2 composer"
+            git push origin main
+          fi
+
+      - name: Verify V1.2 composer source
         run: |
           test -f index.html
           test -f manifest.webmanifest
           test -f service-worker.js
-          test -f icon-192.png
-          test -f icon-512.png
-          test -f apple-touch-icon.png
-          grep -q 'V1.1.0 Dictionary' index.html
-          grep -q '成人玩法辭典' index.html
-          grep -q 'play-dict-body' index.html
-          grep -q 'orgasm_control' index.html
-          grep -q 'roleplay_scenario' index.html
-          grep -q 'trait-preset-chip' index.html
+          grep -q 'V1.2.0 Composer' index.html
+          grep -q '核心元素組合器' index.html
+          grep -q "label:'炮機'" index.html
+          grep -q "label:'八爪椅'" index.html
+          grep -q "label:'觸手'" index.html
+          grep -q "label:'注入'" index.html
+          grep -q "label:'完全無法動彈'" index.html
+          grep -q '核心成人元素與功能：' index.html
+          grep -q 'readElementCombos' index.html
+          grep -q 'adult-prompt-generator-pwa-v1-2-0' service-worker.js
           ! grep -q '<datalist id="trait-' index.html
-          grep -q 'adult-prompt-generator-pwa-v1-1-0' service-worker.js
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
