@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -21,25 +21,10 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout source
+      - name: Checkout webroot
         uses: actions/checkout@v4
-        with:
-          ref: main
 
-      - name: Materialize V1.1 dictionary source
-        run: |
-          if [ -f scripts/upgrade-dictionary-v1_1.py ]; then
-            python scripts/upgrade-dictionary-v1_1.py
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add index.html service-worker.js
-            if ! git diff --cached --quiet; then
-              git commit -m "Materialize PWA V1.1 dictionary"
-              git push origin main
-            fi
-          fi
-
-      - name: Verify published source
+      - name: Verify V1.1 dictionary source
         run: |
           test -f index.html
           test -f manifest.webmanifest
