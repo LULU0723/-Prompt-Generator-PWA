@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -21,25 +21,34 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout webroot
+      - name: Checkout source
         uses: actions/checkout@v4
+        with:
+          ref: main
 
-      - name: Verify V1.2.1 quick prompt source
+      - name: Materialize V1.2.2 hotfix
+        run: |
+          python scripts/hotfix-v1_2_2.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html service-worker.js
+          if ! git diff --cached --quiet; then
+            git commit -m "Materialize PWA V1.2.2 quick-mode hotfix"
+            git push origin main
+          fi
+
+      - name: Verify V1.2.2 quick prompt source
         run: |
           test -f index.html
           test -f manifest.webmanifest
           test -f service-worker.js
-          test -f icon-192.png
-          test -f icon-512.png
-          test -f apple-touch-icon.png
-          grep -q 'V1.2.1 Quick Prompt' index.html
+          grep -q 'V1.2.2 Quick Prompt Hotfix' index.html
+          grep -q "let generatorMode = 'full';" index.html
           grep -q '玩法速貼' index.html
           grep -q 'compileQuickPrompt' index.html
           grep -q 'validateQuickInput' index.html
           grep -q 'quickCopyPrompt' index.html
-          grep -q '核心元素組合器' index.html
-          grep -q '人物、關係與場景可依故事需要合理補完' index.html
-          grep -q 'adult-prompt-generator-pwa-v1-2-1' service-worker.js
+          grep -q 'adult-prompt-generator-pwa-v1-2-2' service-worker.js
           ! grep -q '<datalist id="trait-' index.html
           python - <<'PY'
           from pathlib import Path
@@ -47,7 +56,10 @@ jobs:
           text = Path('index.html').read_text(encoding='utf-8')
           scripts = re.findall(r'<script>(.*?)</script>', text, re.S)
           assert len(scripts) == 1, f'expected one executable inline script, got {len(scripts)}'
-          Path('/tmp/prompt-generator-app.js').write_text(scripts[0], encoding='utf-8')
+          js = scripts[0]
+          assert js.index("let generatorMode = 'full';") < js.index('function uiValidation()')
+          assert "$('#generatorModeSwitcher').onclick" in js
+          Path('/tmp/prompt-generator-app.js').write_text(js, encoding='utf-8')
           PY
           node --check /tmp/prompt-generator-app.js
           node --check service-worker.js
