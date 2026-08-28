@@ -4,11 +4,11 @@
 
 ## GitHub Pages
 
-預期網站網址：
+網站網址：
 
 https://lulu0723.github.io/-Prompt-Generator-PWA/
 
-目前完整 PWA webroot 已發佈到 `gh-pages` 分支根目錄，包含：
+目前 `main` 分支根目錄就是正式 PWA webroot，包含：
 
 - `index.html`
 - `manifest.webmanifest`
@@ -18,17 +18,7 @@ https://lulu0723.github.io/-Prompt-Generator-PWA/
 - `apple-touch-icon.png`
 - `.nojekyll`
 
-若 GitHub Pages 尚未啟用，只需要在 GitHub 網頁做一次：
-
-1. Repository → **Settings** → **Pages**
-2. Build and deployment → Source 選 **Deploy from a branch**
-3. Branch 選 **gh-pages**
-4. Folder 選 **/ (root)**
-5. Save
-
-之後網址即為：
-
-https://lulu0723.github.io/-Prompt-Generator-PWA/
+`.github/workflows/deploy-pages.yml` 直接把 `main` 根目錄上傳為 GitHub Pages artifact 並部署，不再經過 `gh-pages` 重建、bundle 解包或執行期 patch。
 
 ## iPhone 使用
 
@@ -37,6 +27,14 @@ https://lulu0723.github.io/-Prompt-Generator-PWA/
 3. 選「加入主畫面」。
 4. 之後可像 App 一樣從主畫面啟動。
 5. 首次完整載入後，Service Worker 會快取 App Shell，之後可離線開啟。
+
+## V1.0.3 手機詞庫 UI
+
+- 人格建議詞改為常駐可點 chip，不再依賴 `<datalist>`。
+- 關係類型也提供常駐 chip。
+- 自由文字輸入仍保留。
+- 人格 chip 仍透過既有 `vocabTrait()` 建立 trait，因此 `polarityTags` 與人格融合邏輯保持不變。
+- Service Worker cache：`adult-prompt-generator-pwa-v1-0-3`。
 
 ## 隱私
 
@@ -47,9 +45,10 @@ https://lulu0723.github.io/-Prompt-Generator-PWA/
 
 ## Repository 結構
 
-- `main`：部署來源與重建 workflow
-- `gh-pages`：實際可由 GitHub Pages 提供的完整 PWA webroot
+- `main/index.html`：正式線上版本，也是審查來源。
+- `main/service-worker.js`：正式 Service Worker。
+- `.github/workflows/deploy-pages.yml`：只負責驗證並直接部署上述 webroot。
 
-`.github/workflows/deploy-pages.yml` 會在 `main` 更新後重新建立 webroot 並更新 `gh-pages` 分支；GitHub Pages 的 Repository Settings 開關仍需由帳號端設定一次。
+因此之後審查不需要查看 build artifact 或 `gh-pages`；直接檢查 `main` 即可看到實際部署內容。
 
-PWA V1.0.2。
+PWA V1.0.3。
