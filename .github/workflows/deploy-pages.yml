@@ -21,10 +21,42 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout published webroot
+      - name: Checkout source
         uses: actions/checkout@v4
-        with:
-          ref: gh-pages
+
+      - name: Rebuild frozen PWA webroot
+        run: |
+          cat \
+            bundle/site.b64.00 \
+            bundle/site.b64.01a \
+            bundle/site.b64.01b \
+            bundle/site.b64.02 \
+            bundle/site.b64.03 \
+            bundle/site.b64.04 \
+            bundle/site.b64.05a \
+            bundle/site.b64.05b \
+            bundle/site.b64.06 \
+            bundle/site.b64.07 \
+            | base64 --decode > site-rebuilt.zip
+          unzip -tq site-rebuilt.zip
+          rm -rf dist
+          mkdir -p dist
+          unzip -q site-rebuilt.zip -d dist
+          test -f dist/index.html
+          test -f dist/manifest.webmanifest
+          test -f dist/service-worker.js
+          test -f dist/icon-192.png
+          test -f dist/icon-512.png
+          test -f dist/apple-touch-icon.png
+
+      - name: Apply mobile vocabulary chip UI
+        run: |
+          python scripts/patch-mobile-chips.py
+          grep -q 'V1.0.3 PWA' dist/index.html
+          grep -q 'trait-preset-chip' dist/index.html
+          grep -q 'relationshipTypeChips' dist/index.html
+          ! grep -q '<datalist id="trait-' dist/index.html
+          grep -q 'adult-prompt-generator-pwa-v1-0-3' dist/service-worker.js
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -32,7 +64,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: dist
 
       - name: Deploy to GitHub Pages
         id: deployment
