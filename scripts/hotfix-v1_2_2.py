@@ -13,4 +13,8 @@ if "let generatorMode = 'full';" not in s:
 s = s.replace('V1.2.1 Quick Prompt', 'V1.2.2 Quick Prompt Hotfix')
 s = s.replace('V1.2.1 Composer · Quick Prompt Mode', 'V1.2.2 Composer · Quick Prompt Mode')
 p.write_text(s, encoding='utf-8')
+
+sw = Path('service-worker.js')
+sw_text = sw.read_text(encoding='utf-8').replace('adult-prompt-generator-pwa-v1-2-1','adult-prompt-generator-pwa-v1-2-2')
+sw.write_text(sw_text, encoding='utf-8')
 print('V1.2.2 hotfix applied')
