@@ -1,0 +1,887 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f4f1">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Prompt Generator">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<meta name="color-scheme" content="light">
+<title>成人小說 Prompt Generator｜PWA</title>
+<style>
+:root{
+  --bg:#f5f4f1;--panel:#fff;--panel2:#faf9f7;--text:#242321;--muted:#716d66;--line:#dedbd5;
+  --accent:#3c4359;--accent2:#eef0f6;--danger:#a13e3e;--ok:#2f6b4f;--shadow:0 8px 30px rgba(40,35,30,.06);
+  --radius:14px;--radius-sm:9px;--focus:0 0 0 3px rgba(60,67,89,.14);
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;padding-bottom:env(safe-area-inset-bottom);background:var(--bg);color:var(--text);font:14px/1.55 system-ui,-apple-system,"Segoe UI","Noto Sans TC","PingFang TC",sans-serif}
+button,input,textarea,select{font:inherit;color:inherit}button{cursor:pointer}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(245,244,241,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+.topbar-inner{max-width:1480px;margin:auto;padding:12px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:baseline;gap:10px}.brand h1{font-size:18px;margin:0;letter-spacing:.02em}.version{color:var(--muted);font-size:12px}.privacy{color:var(--muted);font-size:12px}
+.shell{max-width:1480px;margin:18px auto 50px;padding:0 22px;display:grid;grid-template-columns:minmax(0,1fr) 430px;gap:18px;align-items:start}
+.workspace{min-width:0}.preview{position:sticky;top:72px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 17px;border-bottom:1px solid var(--line)}
+.card-head h2,.card-head h3{margin:0;font-size:16px}.card-body{padding:16px 17px}.subtle{color:var(--muted);font-size:12px}.required{color:var(--danger)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.field{display:flex;flex-direction:column;gap:5px}.field>span{font-weight:600;font-size:13px}
+input[type=text],input[type=number],textarea,select{width:100%;border:1px solid #cbc7bf;border-radius:var(--radius-sm);background:#fff;padding:9px 10px;outline:none;transition:.15s}
+input:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:var(--focus)}textarea{resize:vertical;min-height:76px}.opening{min-height:112px}
+.btn{border:1px solid #c9c5bd;background:#fff;border-radius:9px;padding:8px 11px;line-height:1.1}.btn:hover{background:#f7f6f3}.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn.primary:hover{filter:brightness(.96)}.btn.danger{color:var(--danger)}.btn.ghost{border-color:transparent;background:transparent}.btn.small{padding:6px 8px;font-size:12px}.btn:disabled{opacity:.42;cursor:not-allowed}
+.actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.segmented{display:flex;flex-wrap:wrap;gap:7px}.segmented label{position:relative}.segmented input{position:absolute;opacity:0;pointer-events:none}.segmented span{display:inline-block;border:1px solid #cbc7bf;border-radius:999px;padding:7px 10px;background:#fff;cursor:pointer}.segmented input:checked+span{background:var(--accent2);border-color:var(--accent);font-weight:650}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.role-card{border:1px solid var(--line);border-radius:12px;background:var(--panel2);overflow:hidden}.role-head{padding:11px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px}.role-head strong{font-size:15px}.role-body{padding:12px}.role-name{color:var(--muted);font-size:12px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+details{border-top:1px solid var(--line);margin-top:12px;padding-top:10px}summary{cursor:pointer;font-weight:650;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px}summary::-webkit-details-marker{display:none}summary:after{content:"＋";color:var(--muted)}details[open]>summary:after{content:"－"}.details-content{padding-top:11px}
+.trait-group{margin:9px 0 12px}.trait-title{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:650;margin-bottom:5px}.trait-count{color:var(--muted);font-weight:400}.trait-entry{position:relative}.trait-entry input{padding-right:36px}.trait-add{position:absolute;right:4px;top:4px;width:30px;height:30px;border:0;border-radius:7px;background:var(--accent2)}
+.tokens{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;min-height:0}.token{display:inline-flex;align-items:center;gap:4px;background:#ebe9e4;border-radius:999px;padding:4px 7px;font-size:12px}.token button{border:0;background:transparent;padding:0 1px;color:#777;font-size:14px;line-height:1}
+.cap-grid,.chip-grid{display:flex;flex-wrap:wrap;gap:6px}.check-chip{position:relative}.check-chip input{position:absolute;opacity:0}.check-chip span{display:block;border:1px solid #cfcbc4;background:#fff;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:12px}.check-chip input:checked+span{background:var(--accent2);border-color:var(--accent);font-weight:650}.check-chip input:disabled+span{opacity:.45;cursor:not-allowed}
+.library-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;margin-bottom:9px}.library-row select{min-width:0}
+.play-toolbar{display:grid;grid-template-columns:minmax(160px,1fr) auto;gap:10px;align-items:center}.search-wrap{position:relative}.search-wrap input{padding-left:34px}.search-wrap:before{content:"⌕";position:absolute;left:11px;top:6px;color:var(--muted);font-size:18px}.play-tabs{display:flex;gap:6px;overflow:auto;padding:10px 0 4px}.tab{white-space:nowrap;border:1px solid #cbc7bf;background:#fff;border-radius:999px;padding:6px 9px}.tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.play-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.play-item{border:1px solid var(--line);border-radius:10px;background:#fff;padding:10px;display:flex;flex-direction:column;gap:7px;min-height:104px}.play-item.selected{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}.play-top{display:flex;align-items:flex-start;gap:8px}.play-top input{margin-top:3px}.play-label{font-weight:650}.play-desc{color:var(--muted);font-size:12px;line-height:1.45}.play-meta{display:flex;align-items:center;gap:6px;justify-content:space-between}.badge{display:inline-block;background:#f0eee9;color:#625e57;border-radius:999px;padding:2px 6px;font-size:10px}.assignment{font-size:12px;padding:6px 7px}
+.empty{padding:28px 12px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:10px}.count-badge{background:var(--accent2);border-radius:999px;padding:3px 7px;font-size:12px}
+.status-box{padding:11px 12px;border-radius:10px;background:#f7f6f3;border:1px solid var(--line);font-size:12px}.status-box.ok{background:#edf5f0;border-color:#c6ded0;color:var(--ok)}.status-box.warn{background:#faf1ef;border-color:#e4cac4;color:#874039}.missing-list{margin-top:5px}
+.output{width:100%;height:62vh;min-height:480px;resize:vertical;border-radius:10px;background:#fbfbfa;font:12.5px/1.62 ui-monospace,SFMono-Regular,Menlo,Consolas,"Noto Sans Mono CJK TC",monospace;padding:12px}.output-meta{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:11px;margin-top:7px}
+.floating-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.notice{padding:9px 11px;background:#f5f3ee;border-radius:9px;color:#666;font-size:12px}.js-warning{margin:12px 17px 0;background:#fff3d8;border:1px solid #e3c98e;color:#73551d}.js-ready .js-warning{display:none}.error{color:var(--danger);font-size:12px;margin-top:6px}.hidden{display:none!important}
+.trait-presets{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 8px}.trait-preset-chip,.trait-more,.relationship-type-chip{min-height:40px;border:1px solid #cbc7bf;background:#fff;border-radius:999px;padding:8px 14px;font-size:12px;line-height:1.2}.trait-preset-chip[aria-pressed="true"],.relationship-type-chip[aria-pressed="true"]{background:var(--accent2);border-color:var(--accent);font-weight:650}.trait-more{border-style:dashed;color:var(--muted)}.relationship-type-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.preset-row{display:flex;gap:5px;flex-wrap:wrap;margin:6px 0 0}.preset{border:1px dashed #bbb6ad;background:transparent;border-radius:7px;padding:4px 7px;font-size:11px;color:#67635c}.preset:hover{background:#f1efeb}
+footer{max-width:1480px;margin:0 auto 25px;padding:0 22px;color:var(--muted);font-size:11px}
+@media(max-width:1120px){.shell{grid-template-columns:1fr}.preview{position:static}.output{height:500px}.role-grid{grid-template-columns:1fr 1fr}}
+
+.pwa-tools{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}.pwa-state{font-size:11px;color:var(--muted);white-space:nowrap}.pwa-state.offline{color:var(--danger)}.pwa-tip{margin-bottom:14px;border:1px solid #cfd3df;background:#f7f8fc}.pwa-tip strong{color:var(--accent)}
+@media(display-mode:standalone){#pwaInstallBtn{display:none!important}.pwa-tip{display:none!important}}
+@media(max-width:760px){.topbar-inner,.shell{padding-left:12px;padding-right:12px}.shell{margin-top:10px}.role-grid,.grid2,.grid3,.play-list{grid-template-columns:1fr}.privacy{display:none}.card-body{padding:13px}.play-toolbar{grid-template-columns:1fr}.output{min-height:420px}.role-grid{grid-template-columns:1fr;align-items:start}.role-card,.role-body{height:auto!important;max-height:none!important;overflow:visible!important}.role-body{display:block!important}.card-head{align-items:flex-start;flex-wrap:wrap}.library-row{grid-template-columns:1fr}.library-row .actions{justify-content:flex-start}}
+</style>
+</head>
+<body>
+<header class="topbar"><div class="topbar-inner">
+  <div class="brand"><h1>成人小說 Prompt Generator</h1><span class="version">V1.0.3 PWA</span></div>
+  <div class="pwa-tools"><span class="privacy">不呼叫 API · 角色庫只存在此瀏覽器</span><span class="pwa-state" id="pwaNetworkState">檢查連線中</span><button class="btn small" type="button" id="pwaInstallBtn">安裝到主畫面</button></div>
+</div></header>
+<main class="shell">
+<section class="workspace">
+  <section class="notice pwa-tip hidden" id="pwaInstallTip"><strong>iPhone 安裝方式</strong><br>請用 Safari 開啟此網址，點底部「分享」→「加入主畫面」。安裝後可像 App 一樣從桌面啟動，首次成功載入後也可離線使用。<div class="actions" style="margin-top:8px"><button class="btn small" type="button" id="pwaTipClose">知道了</button></div></section>
+  <section class="card" id="roleSection">
+    <div class="card-head"><div><h2>1. 角色</h2><div class="subtle">角色可直接填，也可存進本機角色庫重複使用。</div></div><div class="actions"><button class="btn small" id="swapRoles">交換 A / B</button><button class="btn small" id="exportRoles">匯出角色庫</button><button class="btn small" id="importRolesBtn">匯入角色庫</button><input id="importRolesFile" type="file" accept="application/json,.json" hidden></div></div><div class="notice js-warning" id="jsInitWarning"><strong>目前瀏覽器沒有啟動 JavaScript。</strong><br>角色基本欄位仍可看到，但角色庫、玩法選擇與產生 Prompt 需要 JavaScript。這個 PWA 必須在 Safari／Chrome 等正式瀏覽器環境執行；若你看到本提示，代表目前頁面沒有執行 JavaScript。</div>
+    <div class="card-body"><div class="role-grid"><div id="roleA"><div class="role-card" data-role="A">
+    <div class="role-head"><div><strong>角色 A<span class="required">＊</span></strong><div class="role-name" data-role-summary="A">尚未命名</div></div><button class="btn small" type="button" data-clear-role="A">清空欄位</button></div>
+    <div class="role-body">
+      <div class="library-row"><select data-role-load="A"><option value="">從角色庫載入…</option></select><span class="actions"><button class="btn small" type="button" data-save-role="A">儲存角色</button><button class="btn small danger" type="button" data-delete-role="A">刪除</button></span></div>
+      <div class="grid2"><label class="field"><span>名稱<span class="required">＊</span></span><input type="text" data-r="A" data-f="name" placeholder="角色名稱"></label><label class="field"><span>成年年齡</span><input type="number" min="18" step="1" data-r="A" data-f="age" placeholder="例如 31"></label><label class="field"><span>性別</span><input type="text" data-r="A" data-f="gender" placeholder="例如 男性"></label><label class="field"><span>身分／職業</span><input type="text" data-r="A" data-f="identity" placeholder="例如 研究專案主管"></label></div>
+      <label class="field" style="margin-top:10px"><span>外觀</span><textarea data-r="A" data-f="appearance" placeholder="只寫會影響描寫的外觀特徵即可。"></textarea></label>
+      <details open><summary><span>一般性格</span><span class="subtle">建議最多 5 個</span></summary><div class="details-content"><div class="trait-group" data-trait-group="coreTemperament"><div class="trait-title"><span>核心氣質</span><span class="trait-count" data-trait-count="coreTemperament">0</span></div><div class="tokens" data-trait-tokens="coreTemperament"></div><div class="trait-entry"><input type="text" data-trait-input="coreTemperament" placeholder="輸入後 Enter；也可自訂"><button type="button" class="trait-add" data-trait-add="coreTemperament" aria-label="加入">＋</button></div></div><div class="trait-group" data-trait-group="socialBehavior"><div class="trait-title"><span>社交方式</span><span class="trait-count" data-trait-count="socialBehavior">0</span></div><div class="tokens" data-trait-tokens="socialBehavior"></div><div class="trait-entry"><input type="text" data-trait-input="socialBehavior" placeholder="輸入後 Enter；也可自訂"><button type="button" class="trait-add" data-trait-add="socialBehavior" aria-label="加入">＋</button></div></div><div class="trait-group" data-trait-group="emotionalProcessing"><div class="trait-title"><span>情緒處理</span><span class="trait-count" data-trait-count="emotionalProcessing">0</span></div><div class="tokens" data-trait-tokens="emotionalProcessing"></div><div class="trait-entry"><input type="text" data-trait-input="emotionalProcessing" placeholder="輸入後 Enter；也可自訂"><button type="button" class="trait-add" data-trait-add="emotionalProcessing" aria-label="加入">＋</button></div></div><div class="trait-group" data-trait-group="actionTendency"><div class="trait-title"><span>行動傾向</span><span class="trait-count" data-trait-count="actionTendency">0</span></div><div class="tokens" data-trait-tokens="actionTendency"></div><div class="trait-entry"><input type="text" data-trait-input="actionTendency" placeholder="輸入後 Enter；也可自訂"><button type="button" class="trait-add" data-trait-add="actionTendency" aria-label="加入">＋</button></div></div></div></details>
+      <details open><summary><span>親密互動特徵</span><span class="subtle">建議最多 4 個</span></summary><div class="details-content"><div class="trait-group" data-trait-group="intimateInitiative"><div class="trait-title"><span>主動方式</span><span class="trait-count" data-trait-count="intimateInitiative">0</span></div><div class="tokens" data-trait-tokens="intimateInitiative"></div><div class="trait-entry"><input type="text" data-trait-input="intimateInitiative" placeholder="輸入後 Enter；也可自訂"><button type="button" class="trait-add" data-trait-add="intimateInitiative" aria-label="加入">＋</button></div></div><div class="trait-group" data-trait-group="shakenReaction"><div class="trait-title"><span>動搖／失態反應</span><span class="trait-count" data-trait-count="shakenReaction">0</span></div><div class="tokens" data-trait-tokens="shakenReaction"></div><div class="trait-entry"><input type="text" data-trait-input="shakenReaction" placeholder="輸入後 Enter；也可自訂"><button type="button" class="trait-add" data-trait-add="shakenReaction" aria-label="加入">＋</button></div></div><div class="trait-group" data-trait-group="relationshipDynamic"><div class="trait-title"><span>偏好的關係動態</span><span class="trait-count" data-trait-count="relationshipDynamic">0</span></div><div class="tokens" data-trait-tokens="relationshipDynamic"></div><div class="trait-entry"><input type="text" data-trait-input="relationshipDynamic" placeholder="輸入後 Enter；也可自訂"><button type="button" class="trait-add" data-trait-add="relationshipDynamic" aria-label="加入">＋</button></div></div><div class="trait-group" data-trait-group="afterIntimacy"><div class="trait-title"><span>親密後狀態</span><span class="trait-count" data-trait-count="afterIntimacy">0</span></div><div class="tokens" data-trait-tokens="afterIntimacy"></div><div class="trait-entry"><input type="text" data-trait-input="afterIntimacy" placeholder="輸入後 Enter；也可自訂"><button type="button" class="trait-add" data-trait-add="afterIntimacy" aria-label="加入">＋</button></div></div></div></details>
+      <details><summary><span>種族／特殊身體與幻想能力</span><span class="subtle" data-advanced-count="A">未填</span></summary><div class="details-content"><label class="field"><span>種族／特殊身體</span><textarea data-r="A" data-f="speciesBody" placeholder="例如：非人存在，可顯現觸肢等非人肢體。"></textarea></label><div class="preset-row"><button type="button" class="preset" data-species="人類">人類</button><button type="button" class="preset" data-species="獸人">獸人</button><button type="button" class="preset" data-species="貓人">貓人</button><button type="button" class="preset" data-species="犬人">犬人</button><button type="button" class="preset" data-species="蛇人">蛇人</button><button type="button" class="preset" data-species="惡魔">惡魔</button><button type="button" class="preset" data-species="精靈">精靈</button><button type="button" class="preset" data-species="外神／古神">外神／古神</button><button type="button" class="preset" data-species="ABO">ABO</button><button type="button" class="preset" data-species="偽娘">偽娘</button><button type="button" class="preset" data-species="扶他">扶他</button></div><div class="field" style="margin-top:11px"><span>幻想能力</span><div class="cap-grid"><label class="check-chip"><input type="checkbox" data-cap="body_extension"><span>非人身體／身體延伸</span></label><label class="check-chip"><input type="checkbox" data-cap="magic_control"><span>魔法控制／拘束</span></label><label class="check-chip"><input type="checkbox" data-cap="sensory_mental"><span>感官／精神干涉</span></label><label class="check-chip"><input type="checkbox" data-cap="space_environment"><span>空間／環境操作</span></label><label class="check-chip"><input type="checkbox" data-cap="creation_summoning"><span>創造／召喚</span></label><label class="check-chip"><input type="checkbox" data-cap="body_rule_recovery"><span>身體規則／超常恢復</span></label></div></div></div></details>
+      <details><summary><span>角色補充</span><span class="subtle" data-supplement-count="A">未填</span></summary><div class="details-content"><textarea data-r="A" data-f="supplement" placeholder="例如：他很少主動談自己的感受，但會記住對方隨口提過的小事。"></textarea></div></details>
+    </div></div></div><div id="roleB"><div class="role-card" data-role="B">
+    <div class="role-head"><div><strong>角色 B<span class="required">＊</span></strong><div class="role-name" data-role-summary="B">尚未命名</div></div><button class="btn small" type="button" data-clear-role="B">清空欄位</button></div>
+    <div class="role-body">
+      <div class="library-row"><select data-role-load="B"><option value="">從角色庫載入…</option></select><span class="actions"><button class="btn small" type="button" data-save-role="B">儲存角色</button><button class="btn small danger" type="button" data-delete-role="B">刪除</button></span></div>
+      <div class="grid2"><label class="field"><span>名稱<span class="required">＊</span></span><input type="text" data-r="B" data-f="name" placeholder="角色名稱"></label><label class="field"><span>成年年齡</span><input type="number" min="18" step="1" data-r="B" data-f="age" placeholder="例如 31"></label><label class="field"><span>性別</span><input type="text" data-r="B" data-f="gender" placeholder="例如 男性"></label><label class="field"><span>身分／職業</span><input type="text" data-r="B" data-f="identity" placeholder="例如 研究專案主管"></label></div>
+      <label class="field" style="margin-top:10px"><span>外觀</span><textarea data-r="B" data-f="appearance" placeholder="只寫會影響描寫的外觀特徵即可。"></textarea></label>
+      <details open><summary><span>一般性格</span><span class="subtle">建議最多 5 個</span></summary><div class="details-content"><div class="trait-group" data-trait-group="coreTemperament"><div class="trait-title"><span>核心氣質</span><span class="trait-count" data-trait-count="coreTemperament">0</span></div><div class="tokens" data-trait-tokens="coreTemperament"></div><div class="trait-entry"><input type="text" data-trait-input="coreTemperament" placeholder="輸入後 Enter；也可自訂"><button type="button" class="trait-add" data-trait-add="coreTemperament" aria-label="加入">＋</button></div></div><div class="trait-group" data-trait-group="socialBehavior"><div class="trait-title"><span>社交方式</span><span class="trait-count" data-trait-count="socialBehavior">0</span></div><div class="tokens" data-trait-tokens="socialBehavior"></div><div class="trait-entry"><input type="text" data-trait-input="socialBehavior" placeholder="輸入後 Enter；也可自訂"><button type="button" class="trait-add" data-trait-add="socialBehavior" aria-label="加入">＋</button></div></div><div class="trait-group" data-trait-group="emotionalProcessing"><div class="trait-title"><span>情緒處理</span><span class="trait-count" data-trait-count="emotionalProcessing">0</span></div><div class="tokens" data-trait-tokens="emotionalProcessing"></div><div class="trait-entry"><input type="text" data-trait-input="emotionalProcessing" placeholder="輸入後 Enter；也可自訂"><button type="button" class="trait-add" data-trait-add="emotionalProcessing" aria-label="加入">＋</button></div></div><div class="trait-group" data-trait-group="actionTendency"><div class="trait-title"><span>行動傾向</span><span class="trait-count" data-trait-count="actionTendency">0</span></div><div class="tokens" data-trait-tokens="actionTendency"></div><div class="trait-entry"><input type="text" data-trait-input="actionTendency" placeholder="輸入後 Enter；也可自訂"><button type="button" class="trait-add" data-trait-add="actionTendency" aria-label="加入">＋</button></div></div></div></details>
+      <details open><summary><span>親密互動特徵</span><span class="subtle">建議最多 4 個</span></summary><div class="details-content"><div class="trait-group" data-trait-group="intimateInitiative"><div class="trait-title"><span>主動方式</span><span class="trait-count" data-trait-count="intimateInitiative">0</span></div><div class="tokens" data-trait-tokens="intimateInitiative"></div><div class="trait-entry"><input type="text" data-trait-input="intimateInitiative" placeholder="輸入後 Enter；也可自訂"><button type="button" class="trait-add" data-trait-add="intimateInitiative" aria-label="加入">＋</button></div></div><div class="trait-group" data-trait-group="shakenReaction"><div class="trait-title"><span>動搖／失態反應</span><span class="trait-count" data-trait-count="shakenReaction">0</span></div><div class="tokens" data-trait-tokens="shakenReaction"></div><div class="trait-entry"><input type="text" data-trait-input="shakenReaction" placeholder="輸入後 Enter；也可自訂"><button type="button" class="trait-add" data-trait-add="shakenReaction" aria-label="加入">＋</button></div></div><div class="trait-group" data-trait-group="relationshipDynamic"><div class="trait-title"><span>偏好的關係動態</span><span class="trait-count" data-trait-count="relationshipDynamic">0</span></div><div class="tokens" data-trait-tokens="relationshipDynamic"></div><div class="trait-entry"><input type="text" data-trait-input="relationshipDynamic" placeholder="輸入後 Enter；也可自訂"><button type="button" class="trait-add" data-trait-add="relationshipDynamic" aria-label="加入">＋</button></div></div><div class="trait-group" data-trait-group="afterIntimacy"><div class="trait-title"><span>親密後狀態</span><span class="trait-count" data-trait-count="afterIntimacy">0</span></div><div class="tokens" data-trait-tokens="afterIntimacy"></div><div class="trait-entry"><input type="text" data-trait-input="afterIntimacy" placeholder="輸入後 Enter；也可自訂"><button type="button" class="trait-add" data-trait-add="afterIntimacy" aria-label="加入">＋</button></div></div></div></details>
+      <details><summary><span>種族／特殊身體與幻想能力</span><span class="subtle" data-advanced-count="B">未填</span></summary><div class="details-content"><label class="field"><span>種族／特殊身體</span><textarea data-r="B" data-f="speciesBody" placeholder="例如：非人存在，可顯現觸肢等非人肢體。"></textarea></label><div class="preset-row"><button type="button" class="preset" data-species="人類">人類</button><button type="button" class="preset" data-species="獸人">獸人</button><button type="button" class="preset" data-species="貓人">貓人</button><button type="button" class="preset" data-species="犬人">犬人</button><button type="button" class="preset" data-species="蛇人">蛇人</button><button type="button" class="preset" data-species="惡魔">惡魔</button><button type="button" class="preset" data-species="精靈">精靈</button><button type="button" class="preset" data-species="外神／古神">外神／古神</button><button type="button" class="preset" data-species="ABO">ABO</button><button type="button" class="preset" data-species="偽娘">偽娘</button><button type="button" class="preset" data-species="扶他">扶他</button></div><div class="field" style="margin-top:11px"><span>幻想能力</span><div class="cap-grid"><label class="check-chip"><input type="checkbox" data-cap="body_extension"><span>非人身體／身體延伸</span></label><label class="check-chip"><input type="checkbox" data-cap="magic_control"><span>魔法控制／拘束</span></label><label class="check-chip"><input type="checkbox" data-cap="sensory_mental"><span>感官／精神干涉</span></label><label class="check-chip"><input type="checkbox" data-cap="space_environment"><span>空間／環境操作</span></label><label class="check-chip"><input type="checkbox" data-cap="creation_summoning"><span>創造／召喚</span></label><label class="check-chip"><input type="checkbox" data-cap="body_rule_recovery"><span>身體規則／超常恢復</span></label></div></div></div></details>
+      <details><summary><span>角色補充</span><span class="subtle" data-supplement-count="B">未填</span></summary><div class="details-content"><textarea data-r="B" data-f="supplement" placeholder="例如：他很少主動談自己的感受，但會記住對方隨口提過的小事。"></textarea></div></details>
+    </div></div></div></div></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><div><h2>2. 兩人關係</h2><div class="subtle">全部選填；沒有填的內容不會出現在 Prompt。</div></div></div>
+    <div class="card-body">
+      <div class="grid2">
+        <label class="field"><span>關係類型</span><input id="relType" type="text" placeholder="例如：上下級、戀人、信仰／侍奉"><div class="relationship-type-chips" id="relationshipTypeChips"></div></label>
+        <label class="field"><span>目前狀態</span><input id="relState" type="text" placeholder="例如：已建立信任、曖昧中、剛重逢"></label>
+        <label class="field"><span>權力來源 <span class="subtle">（用、分隔）</span></span><input id="relPower" type="text" placeholder="例如：職務權限、知識差距"></label>
+        <label class="field"><span>關係氛圍 <span class="subtle">（用、分隔）</span></span><input id="relTone" type="text" placeholder="例如：調侃、相互試探"></label>
+      </div>
+      <label class="field" style="margin-top:10px"><span>關係補充</span><input id="relSupplement" type="text" placeholder="例如：名義上 A 是主管，但實際互動並沒有固定主導者"></label>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><div><h2>3. 本篇</h2><div class="subtle">開場描述是主力欄位；玩法、開場或自由補充至少填一項。</div></div></div>
+    <div class="card-body">
+      <div class="field"><span>內容取向</span><div class="segmented" id="orientationOptions"></div></div>
+      <label class="field" style="margin-top:14px"><span>開場描述</span><textarea class="opening" id="opening" placeholder="例如：兩人剛完成一份困難報告，只剩他們留在辦公室。B 察覺 A 明明受到影響，卻仍若無其事地整理文件。"></textarea></label>
+      <details id="sceneAdvanced"><summary><span>場景進階</span><span class="subtle" id="sceneAdvancedCount">未填</span></summary><div class="details-content">
+        <div class="grid2"><label class="field"><span>地點</span><select id="location"><option value="">不指定</option></select></label><div class="field"><span>當前情境 <span class="subtle">最多 2 個</span></span><div class="chip-grid" id="situations"></div></div></div>
+        <label class="field" style="margin-top:10px"><span>希望的大方向</span><textarea id="sceneDirection" placeholder="例如：讓信任關係與私人慾望在同一場景裡產生張力"></textarea></label>
+      </div></details>
+      <details><summary><span>篇幅</span><span class="subtle" id="lengthSummary">不指定</span></summary><div class="details-content"><div class="segmented" id="lengthOptions"></div><div class="subtle" style="margin-top:7px">留空代表讓模型使用自然長度。</div></div></details>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><div><h2>4. 玩法</h2><div class="subtle">玩法是方向，不是待辦清單。沒有數量上限。</div></div><span class="count-badge" id="playCount">已選 0</span></div>
+    <div class="card-body">
+      <div class="play-toolbar"><div class="search-wrap"><input id="playSearch" type="text" placeholder="搜尋玩法名稱或說明"></div><label class="check-chip"><input id="supernaturalOnly" type="checkbox"><span>只看超自然玩法</span></label></div>
+      <div class="play-tabs" id="playTabs"></div>
+      <div id="playList" class="play-list"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><div><h2>5. 節奏</h2><div class="subtle">最多 3 個；這裡只控制本篇推進方式，不控制總字數。</div></div><span class="count-badge" id="pacingCount">已選 0 / 3</span></div>
+    <div class="card-body"><div class="chip-grid" id="pacing"></div></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><div><h2>6. 自由補充</h2><div class="subtle">冷門地點、特殊條件、沒有進詞庫的玩法都可直接寫在這裡。</div></div></div>
+    <div class="card-body"><details><summary><span>本篇自由補充</span><span class="subtle" id="supplementSummary">未填</span></summary><div class="details-content"><textarea id="storySupplement" placeholder="原樣保留，不由 Compiler 改寫。"></textarea></div></details></div>
+  </section>
+</section>
+
+<aside class="preview">
+  <section class="card">
+    <div class="card-head"><div><h2>Prompt</h2><div class="subtle">符合最小必填後即可產生。</div></div></div>
+    <div class="card-body">
+      <div id="validationBox" class="status-box warn"></div>
+      <div class="floating-actions"><button class="btn primary" id="generate" disabled>產生 Prompt</button><button class="btn" id="copyPrompt" disabled>複製</button><button class="btn" id="downloadPrompt" disabled>下載 TXT</button></div>
+      <div id="compileError" class="error hidden"></div>
+      <textarea id="output" class="output" readonly spellcheck="false" placeholder="產生後會顯示在這裡。"></textarea>
+      <div class="output-meta"><span id="outputChars">0 字元</span><span id="outputState">尚未產生</span></div>
+      <div class="floating-actions"><button class="btn" id="clearStory">清空本篇（保留角色）</button><button class="btn danger" id="clearAll">清空畫面</button><button class="btn" id="loadExample">載入示例</button></div>
+      <div class="notice" style="margin-top:10px">角色庫使用 localStorage。若要換瀏覽器、換電腦或移動 HTML，請先「匯出角色庫」備份。</div>
+    </div>
+  </section>
+</aside>
+</main>
+<footer>V1 Final · Single-file HTML · Vanilla JS · Deterministic Compiler · Master Data v0.10</footer>
+
+<script id="masterData" type="application/json">{"version":"0.10","status":"play_library_candidate_complete_with_anal_sex","schemaVersion":"1.7","sourceSpec":"V1.10 Construction Spec","items":[{"id":"bedroom","type":"location","label":"臥室"},{"id":"living_room","type":"location","label":"客廳"},{"id":"bathroom","type":"location","label":"浴室"},{"id":"hotel_room","type":"location","label":"飯店房間"},{"id":"office","type":"location","label":"辦公室"},{"id":"research_lab","type":"location","label":"研究室"},{"id":"changing_room","type":"location","label":"更衣室"},{"id":"car_interior","type":"location","label":"車內"},{"id":"private_apartment","type":"location","label":"私人公寓"},{"id":"banquet_hall","type":"location","label":"宴會廳"},{"id":"temple","type":"location","label":"神殿"},{"id":"ritual_chamber","type":"location","label":"儀式室"},{"id":"throne_room","type":"location","label":"王座廳／謁見室"},{"id":"library_archive","type":"location","label":"書庫／藏書室"},{"id":"dungeon","type":"location","label":"地牢"},{"id":"magic_tower","type":"location","label":"魔法塔"},{"id":"forest_clearing","type":"location","label":"林間空地"},{"id":"hot_spring","type":"location","label":"溫泉"},{"id":"after_jealousy","type":"situation","label":"吃醋後"},{"id":"after_argument","type":"situation","label":"吵架後"},{"id":"reunion_after_separation","type":"situation","label":"久別重逢"},{"id":"late_night_overtime","type":"situation","label":"深夜加班"},{"id":"after_bathing","type":"situation","label":"洗澡後"},{"id":"after_ritual_or_ceremony","type":"situation","label":"儀式／典禮剛結束"},{"id":"sharing_room_while_traveling","type":"situation","label":"旅行同房"},{"id":"after_banquet","type":"situation","label":"宴會後"},{"id":"after_drinking","type":"situation","label":"喝過酒之後"},{"id":"mutual_desire_no_special_event","type":"situation","label":"雙方單純想親近／沒有特殊事件"},{"id":"after_mission","type":"situation","label":"任務剛結束"},{"id":"while_tending_wounds","type":"situation","label":"替對方處理傷勢時"},{"id":"seeking_shelter_together","type":"situation","label":"共同避難／暫時躲藏"},{"id":"before_departure","type":"situation","label":"即將分別前"},{"id":"after_summoning","type":"situation","label":"召喚／顯現剛完成"},{"id":"after_contract_formation","type":"situation","label":"契約剛成立"},{"id":"slow_burn","type":"pacing","label":"慢熱"},{"id":"long_foreplay","type":"pacing","label":"長前戲"},{"id":"direct_start","type":"pacing","label":"直接開始"},{"id":"repeated_teasing","type":"pacing","label":"全篇反覆撩撥"},{"id":"gradual_loss_of_control","type":"pacing","label":"逐步失控"},{"id":"strong_dominant_flow","type":"pacing","label":"全程強勢"},{"id":"multiple_rounds","type":"pacing","label":"多輪"},{"id":"aftercare","type":"pacing","label":"事後照顧"},{"id":"tentacle_restraint","type":"play","category":"bondage_restriction","label":"觸手拘束","description":"以觸手限制對方的移動或姿勢，重點是利用非人肢體完成束縛。","coversCapability":["body_extension"],"directionMode":"direction"},{"id":"multiple_tentacles","type":"play","category":"nonhuman_fantasy","label":"多條觸手","description":"同時使用多條觸手進行接觸或限制，重點在多點同步的非人肢體互動。","coversCapability":["body_extension"],"directionMode":"direction"},{"id":"slime_body_envelopment","type":"play","category":"nonhuman_fantasy","label":"自身液態形態／液態包覆","description":"角色自身具有液態或史萊姆式身體，可改變形態並形成包覆性的非人互動。","coversCapability":["body_extension"],"directionMode":"none"},{"id":"magical_restraint","type":"play","category":"bondage_restriction","label":"魔法束縛（力量拘束）","description":"以魔法、念力或無形力量限制對方行動，不需要實體繩索或拘束器具。","coversCapability":["magic_control"],"directionMode":"direction"},{"id":"magical_pose_lock","type":"play","category":"bondage_restriction","label":"魔法姿勢固定","description":"以超自然力量固定角色的姿勢或肢體位置，使其難以自行改變動作。","coversCapability":["magic_control"],"directionMode":"direction"},{"id":"invisible_hands","type":"play","category":"sensory_stimulation","label":"無形之手（隔空操控身體／器具）","description":"以看不見的力量隔空接觸或操控身體與器具，核心是無實體接觸的控制感。","coversCapability":["magic_control"],"directionMode":"direction"},{"id":"sensory_sharing","type":"play","category":"sensory_stimulation","label":"感官共享","description":"讓角色共享彼此的觸覺或其他感受，使一方的感官變化能被另一方同步感知。","coversCapability":["sensory_mental"],"directionMode":"direction"},{"id":"remote_sensation","type":"play","category":"sensory_stimulation","label":"遠距感覺（不接觸也能傳遞感覺）","description":"不經直接接觸即可把特定感覺傳遞給另一角色，屬超自然的遠距感官干涉。","coversCapability":["sensory_mental"],"directionMode":"direction"},{"id":"supernatural_sensory_amplification","type":"play","category":"sensory_stimulation","label":"超自然感官放大","description":"以超自然手段提高角色對觸覺或其他感官的感受強度，改變原本的感知程度。","coversCapability":["sensory_mental"],"directionMode":"direction"},{"id":"dream_scene","type":"play","category":"nonhuman_fantasy","label":"夢境／共享夢境","description":"以夢境作為互動空間，或讓角色進入同一夢境，屬精神與感官層面的幻想機制。","coversCapability":["sensory_mental"],"directionMode":"direction"},{"id":"illusion_scene","type":"play","category":"nonhuman_fantasy","label":"幻覺情境","description":"透過幻覺改變角色看到或感受到的情境，使實際環境與主觀體驗產生差異。","coversCapability":["sensory_mental"],"directionMode":"direction"},{"id":"pocket_dimension","type":"play","category":"nonhuman_fantasy","label":"異空間","description":"把互動置於獨立或扭曲的特殊空間中，使場景不受一般現實環境限制。","coversCapability":["space_environment"],"directionMode":"none"},{"id":"spatial_lock","type":"play","category":"bondage_restriction","label":"空間固定（無法移動）","description":"直接限制角色所在位置或移動範圍，使其被空間本身固定而難以離開。","coversCapability":["space_environment"],"directionMode":"direction"},{"id":"gravity_change","type":"play","category":"position_body_relation","label":"重力改變","description":"改變局部或整體重力方向與強度，用來影響角色姿勢、移動與身體位置關係。","coversCapability":["space_environment"],"directionMode":"direction"},{"id":"summoned_tentacles","type":"play","category":"nonhuman_fantasy","label":"召喚觸手","description":"由角色額外召喚或生成觸手，而非使用自身原有肢體，屬召喚型非人玩法。","coversCapability":["creation_summoning"],"directionMode":"direction"},{"id":"summoned_slime","type":"play","category":"nonhuman_fantasy","label":"召喚史萊姆","description":"召喚或創造獨立的史萊姆生物參與互動，重點是外部生成的非人生物。","coversCapability":["creation_summoning"],"directionMode":"direction"},{"id":"clone_or_phantom","type":"play","category":"nonhuman_fantasy","label":"分身／幻影","description":"創造分身或具互動能力的幻影參與場景，使同一角色能以複數存在方式行動。","coversCapability":["creation_summoning"],"directionMode":"direction"},{"id":"generated_magic_toy","type":"play","category":"toys_devices","label":"生成魔法玩具","description":"以魔法或創造能力直接生成本篇需要的成人器具，不依賴事先準備的實體物品。","coversCapability":["creation_summoning"],"directionMode":"direction"},{"id":"generated_restraints","type":"play","category":"bondage_restriction","label":"生成拘束器具","description":"以創造或召喚能力生成繩索、枷具等限制行動的器具，再用於拘束互動。","coversCapability":["creation_summoning"],"directionMode":"direction"},{"id":"supernatural_endurance","type":"play","category":"nonhuman_fantasy","label":"超常耐力","description":"角色具有超越一般人的持續活動能力，可在較長時間或多輪互動中保持狀態。","coversCapability":["body_rule_recovery"],"directionMode":"none"},{"id":"rapid_recovery","type":"play","category":"nonhuman_fantasy","label":"快速恢復","description":"角色能以異常速度從疲勞或身體負荷中恢復，使後續互動不受一般恢復時間限制。","coversCapability":["body_rule_recovery"],"directionMode":"none"},{"id":"temporary_body_adaptation","type":"play","category":"nonhuman_fantasy","label":"暫時身體適應／柔韌改變","description":"暫時改變身體的柔韌、適應或承受方式，使角色能配合超出一般生理條件的情境。","coversCapability":["body_rule_recovery"],"directionMode":"none"},{"id":"command","type":"play","category":"power_control","label":"命令","description":"由一方以明確口頭指令要求另一方執行特定動作或維持某種行為。","coversCapability":[],"directionMode":"direction"},{"id":"posture_instruction","type":"play","category":"power_control","label":"姿勢指令","description":"由一方指定另一方採取或維持特定姿勢，重點在指令本身而非物理拘束。","coversCapability":[],"directionMode":"direction"},{"id":"forbid_initiating","type":"play","category":"power_control","label":"禁止主動","description":"要求另一方不得自行推進或主動觸碰，必須等待對方允許或指示。","coversCapability":[],"directionMode":"direction"},{"id":"require_initiating","type":"play","category":"power_control","label":"要求主動","description":"要求另一方主動採取某個行動或表達意圖，用來形成角色間的權力落差。","coversCapability":[],"directionMode":"direction"},{"id":"permission_control","type":"play","category":"power_control","label":"行動許可","description":"把某些行動設定為需要先取得對方允許，核心是由一方掌握行動決定權。","coversCapability":[],"directionMode":"direction"},{"id":"climax_control","type":"play","category":"power_control","label":"高潮控制","description":"由一方決定另一方何時可以到達高潮，重點在時機與允許權的控制。","coversCapability":[],"directionMode":"direction"},{"id":"edging","type":"play","category":"power_control","label":"邊緣控制","description":"反覆讓興奮接近高潮後暫停或降低刺激，用來延長等待與控制感。","coversCapability":[],"directionMode":"direction"},{"id":"power_reversal","type":"play","category":"power_control","label":"權力逆轉","description":"互動途中由原本較被動的一方取得主導，使當下的控制關係發生明確反轉。","coversCapability":[],"directionMode":"direction"},{"id":"required_form_of_address","type":"play","category":"power_control","label":"稱呼要求","description":"要求另一方使用指定稱呼或稱謂，藉此在本篇互動中建立明確權力感。","coversCapability":[],"directionMode":"direction"},{"id":"obedience_test","type":"play","category":"power_control","label":"服從測試","description":"提出一個對方未必願意配合的要求，重點在是否照做，以及回應如何影響當下互動。","coversCapability":[],"directionMode":"direction"},{"id":"reward_and_consequence","type":"play","category":"power_control","label":"獎勵與懲罰","description":"依另一方是否配合給予不同回應，讓行為與後續結果形成明確的權力連結。","coversCapability":[],"directionMode":"direction"},{"id":"verbal_state_report","type":"play","category":"power_control","label":"口頭報告狀態","description":"要求另一方用言語描述當下感受或狀態，並把回答本身納入控制互動。","coversCapability":[],"directionMode":"direction"},{"id":"call_out_bluff","type":"play","category":"psychological_contrast","label":"拆穿嘴硬","description":"由一方指出另一方的否認、說法與實際反應不一致，讓嘴硬或言行矛盾成為互動焦點。","coversCapability":[],"directionMode":"direction"},{"id":"point_out_reaction","type":"play","category":"psychological_contrast","label":"當面指出反應","description":"由一方把另一方當下顯露的情緒或身體反應直接說出口，使其無法輕易帶過。","coversCapability":[],"directionMode":"direction"},{"id":"ask_to_admit_desire","type":"play","category":"psychological_contrast","label":"要求承認慾望","description":"要求另一方親口說出原本迴避的真實想法或慾望，重點在坦白本身帶來的心理反差。","coversCapability":[],"directionMode":"direction"},{"id":"mirror_reaction_observation","type":"play","category":"psychological_contrast","label":"鏡前觀察反應","description":"讓角色透過鏡面看見自己的表情與反應，把自我察覺本身納入心理互動。","coversCapability":[],"directionMode":"subject"},{"id":"dominant_character_loses_composure","type":"play","category":"psychological_contrast","label":"強勢角色失去從容","description":"刻意安排平時較強勢的角色在本篇失去原有從容，突出前後表現的反差。","coversCapability":[],"directionMode":"subject"},{"id":"reserved_character_crosses_line","type":"play","category":"psychological_contrast","label":"冷淡角色主動跨線","description":"讓平時較冷淡或克制的角色主動跨越原本界線，使主動行為形成明顯反差。","coversCapability":[],"directionMode":"subject"},{"id":"voluntary_embarrassing_action","type":"play","category":"psychological_contrast","label":"主動做出害羞舉動","description":"讓角色自願做出平常會覺得害羞的舉動，重點在自發行為與原本形象的反差。","coversCapability":[],"directionMode":"subject"},{"id":"counter_tease_after_exposure","type":"play","category":"psychological_contrast","label":"被拆穿後反過來挑釁","description":"角色在心思被看穿後不退縮，反而以挑釁回應，使原本的尷尬轉為反向施壓。","coversCapability":[],"directionMode":"direction"},{"id":"embarrassment_from_being_watched","type":"play","category":"psychological_contrast","label":"被注視的羞恥","description":"讓角色明確知道自己正被對方注視，使被看見與無法掩飾本身形成心理壓力。","coversCapability":[],"directionMode":"subject"},{"id":"public_private_identity_contrast","type":"play","category":"psychological_contrast","label":"公開身份與私下反差","description":"利用角色公開身份、平常形象與私下表現的落差，使本篇互動形成明顯身份反差。","coversCapability":[],"directionMode":"subject"},{"id":"bullet_vibrator","type":"play","category":"toys_devices","label":"跳蛋／小型震動器","description":"體積較小、方便局部使用的震動器具，可手持、固定或配合遙控操作。","coversCapability":[],"directionMode":"direction"},{"id":"massage_wand","type":"play","category":"toys_devices","label":"按摩棒／大型震動器","description":"輸出較強、接觸面較大的震動器具，通常以外部接觸方式提供持續刺激。","coversCapability":[],"directionMode":"direction"},{"id":"insertable_toy","type":"play","category":"toys_devices","label":"插入式玩具","description":"以插入使用為主要形式的成人器具，重點在器具本身的形狀、尺寸與使用方式。","coversCapability":[],"directionMode":"direction"},{"id":"anal_plug","type":"play","category":"toys_devices","label":"肛塞","description":"設計為持續留置使用的插入式器具，通常具有較寬底座以避免完全進入體內。","coversCapability":[],"directionMode":"direction"},{"id":"double_ended_toy","type":"play","category":"toys_devices","label":"雙頭玩具","description":"兩端皆可使用的成人器具，可讓雙方同時參與，或由同一角色使用不同端部。","coversCapability":[],"directionMode":"direction"},{"id":"remote_controlled_toy","type":"play","category":"toys_devices","label":"遙控玩具","description":"可由另一裝置遠端調整啟停或強度的成人器具，重點在控制權與距離分離。","coversCapability":[],"directionMode":"direction"},{"id":"wearable_toy","type":"play","category":"toys_devices","label":"穿戴式玩具","description":"可固定在角色身上持續佩戴的成人器具，使用時不需要一直以手持方式操作。","coversCapability":[],"directionMode":"direction"},{"id":"air_pulse_toy","type":"play","category":"toys_devices","label":"氣壓刺激器","description":"利用氣流或壓力脈衝提供非直接摩擦式刺激，與一般震動器的作用方式不同。","coversCapability":[],"directionMode":"direction"},{"id":"blindfold_sensory_focus","type":"play","category":"sensory_stimulation","label":"蒙眼感官強化","description":"遮蔽視覺後把注意力集中到觸覺、聲音與距離感，重點是感官資訊被重新分配。","coversCapability":[],"directionMode":"direction"},{"id":"close_whispering","type":"play","category":"sensory_stimulation","label":"耳邊低語","description":"在近距離以低聲說話或呼吸聲影響對方注意力，重點是聲音與距離造成的感官壓迫。","coversCapability":[],"directionMode":"direction"},{"id":"temperature_stimulation","type":"play","category":"sensory_stimulation","label":"冷熱刺激","description":"利用溫度差異改變皮膚與觸覺感受，可使用冷、熱或交替方式形成明顯感官落差。","coversCapability":[],"directionMode":"direction"},{"id":"light_touch_teasing","type":"play","category":"sensory_stimulation","label":"輕觸挑逗","description":"以較輕、短暫或刻意不完整的接觸維持注意力，重點是觸感本身而非力量控制。","coversCapability":[],"directionMode":"direction"},{"id":"gripping_and_scratching","type":"play","category":"sensory_stimulation","label":"抓握／抓痕","description":"以抓握、指尖施力或留下輕微抓痕作為觸覺刺激，強調較直接的皮膚感受。","coversCapability":[],"directionMode":"direction"},{"id":"biting_and_bite_marks","type":"play","category":"sensory_stimulation","label":"輕咬／咬痕","description":"以牙齒輕咬或留下可見痕跡作為互動元素，重點是觸感與痕跡帶來的存在感。","coversCapability":[],"directionMode":"direction"},{"id":"face_to_face_position","type":"play","category":"position_body_relation","label":"面對面姿勢","description":"讓雙方保持正面相對的身體位置，便於持續觀察表情、視線與彼此反應。","coversCapability":[],"directionMode":"none"},{"id":"from_behind_position","type":"play","category":"position_body_relation","label":"背後姿勢","description":"由一方位於另一方身後進行互動，重點是視線受限與前後位置關係的差異。","coversCapability":[],"directionMode":"direction"},{"id":"riding_position","type":"play","category":"position_body_relation","label":"騎乘姿勢","description":"由其中一名角色位於上方主動調整身體位置，重點在上下關係與主體差異。","coversCapability":[],"directionMode":"subject"},{"id":"side_lying_position","type":"play","category":"position_body_relation","label":"側臥姿勢","description":"雙方以側躺方式保持較貼近的身體位置，整體姿勢相對穩定且移動幅度較小。","coversCapability":[],"directionMode":"none"},{"id":"standing_position","type":"play","category":"position_body_relation","label":"站立姿勢","description":"讓主要互動維持在站立狀態，重點在平衡、身高與身體支撐方式的變化。","coversCapability":[],"directionMode":"none"},{"id":"wall_pin","type":"play","category":"position_body_relation","label":"壓牆","description":"由一方把另一方限制在牆面附近，形成明確前後位置與可活動空間差異。","coversCapability":[],"directionMode":"direction"},{"id":"tabletop_position","type":"play","category":"position_body_relation","label":"桌面／檯面姿勢","description":"利用桌面、檯面等平坦表面支撐身體，使角色位置與高度關係產生明顯變化。","coversCapability":[],"directionMode":"direction"},{"id":"lifted_position","type":"play","category":"position_body_relation","label":"抱起／懸空姿勢","description":"由一方承托或抱起另一方，使部分身體離地，重點在力量差與支撐關係。","coversCapability":[],"directionMode":"direction"},{"id":"height_difference","type":"play","category":"position_body_relation","label":"身高差","description":"把雙方身高差異作為構圖與身體互動的重要條件，使視線與姿勢自然受到影響。","coversCapability":[],"directionMode":"none"},{"id":"wrist_binding","type":"play","category":"bondage_restriction","label":"手腕束縛","description":"限制角色雙手或手腕的活動範圍，使其無法自由使用雙手完成其他動作。","coversCapability":[],"directionMode":"direction"},{"id":"ankle_binding","type":"play","category":"bondage_restriction","label":"腳踝束縛","description":"限制角色雙腳或腳踝的活動範圍，用來降低移動能力或維持特定下肢位置。","coversCapability":[],"directionMode":"direction"},{"id":"four_limb_restraint","type":"play","category":"bondage_restriction","label":"四肢固定","description":"同時限制雙手與雙腳的活動，使角色整體姿勢與可移動範圍受到明確約束。","coversCapability":[],"directionMode":"direction"},{"id":"collar_and_leash","type":"play","category":"bondage_restriction","label":"項圈／牽引","description":"使用項圈與牽引帶限制或引導角色移動，重點在位置控制與明確牽引關係。","coversCapability":[],"directionMode":"direction"},{"id":"clothing_restriction","type":"play","category":"bondage_restriction","label":"衣物限制","description":"利用衣物本身的穿著方式限制活動或脫卸，使服裝成為限制行動的一部分。","coversCapability":[],"directionMode":"direction"},{"id":"dirty_talk","type":"play","category":"sensory_stimulation","label":"Dirty talk（露骨言語）","description":"以直接或露骨的性意味言語表達想法、感受或要求，重點在言語內容而非音量距離。","coversCapability":[],"directionMode":"direction"},{"id":"body_build_and_strength_difference","type":"play","category":"position_body_relation","label":"體型／力量差","description":"把雙方體格或力量差距作為本篇身體互動條件，使支撐、壓制與姿勢呈現受到影響。","coversCapability":[],"directionMode":"none"},{"id":"uniform_or_costume_setting","type":"play","category":"psychological_contrast","label":"制服／特定服裝情境","description":"讓角色穿著具有身份意味的制服或特定服裝互動，重點在服裝帶來的身份感與反差。","coversCapability":[],"directionMode":"subject"},{"id":"oral_sex","type":"play","category":"position_body_relation","label":"口交","description":"以口腔與舌部對另一方性器官進行刺激的性行為，重點在口部接觸與身體位置關係。","coversCapability":[],"directionMode":"direction"},{"id":"manual_genital_stimulation","type":"play","category":"position_body_relation","label":"手部刺激／手交","description":"以手部直接刺激另一方性器官的性行為，重點在手部操作與雙方身體位置關係。","coversCapability":[],"directionMode":"direction"},{"id":"breast_sex","type":"play","category":"position_body_relation","label":"乳交","description":"利用胸部包覆或摩擦另一方性器官的性行為，重點在胸部與雙方身體位置關係。","coversCapability":[],"directionMode":"direction"},{"id":"thigh_sex","type":"play","category":"position_body_relation","label":"腿交","description":"利用大腿或雙腿夾持、摩擦另一方性器官的性行為，重點在腿部與身體位置關係。","coversCapability":[],"directionMode":"direction"},{"id":"anal_sex","type":"play","category":"position_body_relation","label":"肛交","description":"以肛門插入為主要方式的性行為，重點在插入方式與雙方身體位置關係。","coversCapability":[],"directionMode":"direction"}]}</script>
+<script>
+/*
+ * Adult Novel Prompt Generator - Deterministic Prompt Compiler V1
+ * Browser/Node compatible ES module. No framework, no API calls.
+ *
+ * Input is normalized data. UI concerns (labels, controls, localStorage) stay outside.
+ */
+
+const CONTENT_ORIENTATION_OPTIONS = Object.freeze({
+  plot_heavy: Object.freeze({ label: '劇情為主', promptText: '以劇情與關係推進為主，成人內容篇幅較少' }),
+  balanced: Object.freeze({ label: '劇情與成人均衡', promptText: '劇情與成人內容大致均衡' }),
+  adult_heavy: Object.freeze({ label: '成人為主', promptText: '以成人內容為主，劇情只作必要鋪陳' }),
+  almost_pure_adult: Object.freeze({ label: '幾乎純成人', promptText: '以成人內容為主，不需要額外鋪陳劇情' }),
+});
+
+const LENGTH_OPTIONS = Object.freeze({
+  shorter: Object.freeze({ label: '較短', promptText: '篇幅較短，約 3000 字' }),
+  longer: Object.freeze({ label: '較長', promptText: '篇幅較長，約 10000 字' }),
+});
+
+const CAPABILITY_LABELS = Object.freeze({
+  body_extension: '非人身體／身體延伸',
+  magic_control: '魔法控制／拘束',
+  sensory_mental: '感官／精神干涉',
+  space_environment: '空間／環境操作',
+  creation_summoning: '創造／召喚',
+  body_rule_recovery: '身體規則／超常恢復',
+});
+
+const SHARED_CORE_LINES = Object.freeze([
+  '人物在成人情境中的表現必須從原本性格與兩人關係推導，不因進入成人場景而突然換人格。',
+  '讓情節由人物與當前情境自然發展，不套用固定階段模板。選中的玩法只是本篇希望出現的方向，應依故事需要自然融入，不逐項展示或依序完成。',
+  '保持人物、情緒、身體與關係變化的連續性，讓前一步自然影響後一步。',
+  '成人場景以連續的動作、反應與互動推進，感官、心理與對白貼著當下行動發生。',
+  '若設定存在合理空白，可作合理補充；不得擅自改寫使用者已明確指定的人物、關係或核心偏好。',
+]);
+
+const PERSONALITY_PAIR_RULES = Object.freeze([
+  Object.freeze({ left: 'actionTendency', right: 'intimateInitiative', target: 'intimateInitiative', kind: 'action_to_initiative' }),
+  Object.freeze({ left: 'coreTemperament', right: 'intimateInitiative', target: 'intimateInitiative', kind: 'core_to_initiative' }),
+  Object.freeze({ left: 'coreTemperament', right: 'shakenReaction', target: 'shakenReaction', kind: 'core_to_shaken' }),
+]);
+
+// Generic polarity opposition only. No vocabulary-item pair rules.
+const OPPOSITE_POLARITIES = Object.freeze([
+  ['active', 'passive'],
+  ['expressive', 'restrained'],
+  ['expressive', 'reserved'],
+  ['direct', 'avoidant'],
+  ['assertive', 'yielding'],
+  ['stable', 'shaken'],
+  ['controlled', 'impulsive'],
+  ['cool', 'expressive'],
+]);
+
+function cleanString(value) {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function nonEmpty(values) {
+  return (values || []).map(cleanString).filter(Boolean);
+}
+
+function joinChinese(values, conjunction = '與') {
+  const items = nonEmpty(values);
+  if (items.length === 0) return '';
+  if (items.length === 1) return items[0];
+  if (items.length === 2) return `${items[0]}${conjunction}${items[1]}`;
+  return `${items.slice(0, -1).join('、')}${conjunction}${items.at(-1)}`;
+}
+
+function joinCommaSlots(values) {
+  return nonEmpty(values).join('，');
+}
+
+function terminal(text, punctuation = '。') {
+  const s = cleanString(text);
+  if (!s) return '';
+  return /[。！？!?]$/.test(s) ? s : `${s}${punctuation}`;
+}
+
+function hasTerminalPunctuation(text) {
+  return /[。！？!?]$/.test(cleanString(text));
+}
+
+function resolveItem(masterIndex, id, expectedType) {
+  if (!id) return null;
+  const item = masterIndex.get(id);
+  if (!item) throw new Error(`Unknown master-data id: ${id}`);
+  if (expectedType && item.type !== expectedType) {
+    throw new Error(`Master-data type mismatch for ${id}: expected ${expectedType}, got ${item.type}`);
+  }
+  return item;
+}
+
+function buildMasterIndex(masterItems) {
+  const index = new Map();
+  for (const item of masterItems || []) {
+    if (!item?.id) throw new Error('Master-data item missing id');
+    if (index.has(item.id)) throw new Error(`Duplicate master-data id: ${item.id}`);
+    if (item.type === 'play' && item.directionMode === 'subject' && (item.coversCapability || []).length) {
+      throw new Error(`V1 forbids subject-mode Coverage until capability ownership is defined: ${item.id}`);
+    }
+    index.set(item.id, item);
+  }
+  return index;
+}
+
+function roleDisplayName(input, roleKey) {
+  const name = cleanString(input?.characters?.[roleKey]?.name);
+  return name || `角色${roleKey}`;
+}
+
+function traitList(character, category) {
+  const value = character?.personality?.[category];
+  return Array.isArray(value) ? value.filter(v => cleanString(v?.label)) : [];
+}
+
+function traitText(trait) {
+  return cleanString(trait?.surface) || cleanString(trait?.label);
+}
+
+function polaritySet(traits) {
+  return new Set(traits.flatMap(t => Array.isArray(t?.polarityTags) ? t.polarityTags : []).filter(Boolean));
+}
+
+function hasPersonalityContrast(leftTraits, rightTraits) {
+  const left = polaritySet(leftTraits);
+  const right = polaritySet(rightTraits);
+  for (const [a, b] of OPPOSITE_POLARITIES) {
+    if ((left.has(a) && right.has(b)) || (left.has(b) && right.has(a))) return true;
+  }
+  return false;
+}
+
+function renderPersonalityPair(name, rule, leftTraits, rightTraits) {
+  const left = joinChinese(leftTraits.map(traitText));
+  const right = rightTraits.map(traitText).filter(Boolean).join('，');
+  if (!left || !right) return '';
+  switch (rule.kind) {
+    case 'action_to_initiative':
+      return `${name}平常的行動傾向偏${left}，但在親密互動中${right}。`;
+    case 'core_to_initiative':
+      return `${name}整體氣質偏${left}，但在親密互動中${right}。`;
+    case 'core_to_shaken':
+      return `${name}整體氣質偏${left}，但在親密互動真正造成動搖時，${right}。`;
+    default:
+      throw new Error(`Unknown personality rule kind: ${rule.kind}`);
+  }
+}
+
+function compilePersonality(character) {
+  const name = cleanString(character?.name) || '角色';
+  const usedTargets = new Set();
+  const consumed = new Set();
+  const naturalized = [];
+
+  for (const rule of PERSONALITY_PAIR_RULES) {
+    if (usedTargets.has(rule.target)) continue;
+    const left = traitList(character, rule.left);
+    const right = traitList(character, rule.right);
+    if (!left.length || !right.length || !hasPersonalityContrast(left, right)) continue;
+
+    const sentence = renderPersonalityPair(name, rule, left, right);
+    if (!sentence) continue;
+    naturalized.push(sentence);
+    usedTargets.add(rule.target);
+    for (const t of left) consumed.add(t);
+    for (const t of right) consumed.add(t);
+  }
+
+  const generalCategories = ['coreTemperament', 'socialBehavior', 'emotionalProcessing', 'actionTendency'];
+  const intimateCategories = ['intimateInitiative', 'shakenReaction', 'relationshipDynamic', 'afterIntimacy'];
+
+  const remainingGeneral = generalCategories.flatMap(c => traitList(character, c)).filter(t => !consumed.has(t));
+  const remainingIntimate = intimateCategories.flatMap(c => traitList(character, c)).filter(t => !consumed.has(t));
+
+  const lines = [...naturalized];
+  if (remainingGeneral.length) {
+    lines.push(`一般性格：${remainingGeneral.map(t => cleanString(t.label)).join('、')}。`);
+  }
+  if (remainingIntimate.length) {
+    lines.push(`親密互動特徵：${remainingIntimate.map(t => cleanString(t.label)).join('；')}。`);
+  }
+  return lines;
+}
+
+function normalizePlaySelections(input, masterIndex) {
+  return (input?.plays || []).map(selection => {
+    const item = resolveItem(masterIndex, selection?.id, 'play');
+    return { item, assignment: cleanString(selection?.assignment) || 'llm' };
+  });
+}
+
+function coveredCapabilityRoles(input, playSelections) {
+  const capsByRole = {
+    A: new Set(input?.characters?.A?.fantasyCapabilities || []),
+    B: new Set(input?.characters?.B?.fantasyCapabilities || []),
+  };
+  const covered = { A: new Set(), B: new Set() };
+
+  for (const { item, assignment } of playSelections) {
+    for (const cap of item.coversCapability || []) {
+      const eligible = ['A', 'B'].filter(r => capsByRole[r].has(cap));
+      if (!eligible.length) continue;
+
+      if (item.directionMode === 'direction') {
+        if (assignment === 'A_to_B' && capsByRole.A.has(cap)) covered.A.add(cap);
+        else if (assignment === 'B_to_A' && capsByRole.B.has(cap)) covered.B.add(cap);
+        else if (assignment === 'both') {
+          for (const r of eligible) covered[r].add(cap);
+        } else if ((assignment === 'llm' || !assignment) && eligible.length === 1) {
+          // Dedup only when capability ownership is unambiguous.
+          covered[eligible[0]].add(cap);
+        }
+      } else if (item.directionMode === 'none') {
+        // none-mode has no actor. Dedup only when exactly one role owns the capability.
+        if (eligible.length === 1) covered[eligible[0]].add(cap);
+      } else if (item.directionMode === 'subject') {
+        // V1 master data intentionally has no subject-mode Coverage.
+        // Do not silently invent capability-source semantics if future data changes.
+        throw new Error(`Subject-mode Coverage requires an explicit future rule: ${item.id}`);
+      }
+    }
+  }
+  return covered;
+}
+
+function remainingCapabilities(input, roleKey, covered) {
+  const selected = input?.characters?.[roleKey]?.fantasyCapabilities || [];
+  return selected.filter(id => !covered[roleKey].has(id));
+}
+
+function compileCharacter(input, roleKey, masterIndex, covered) {
+  const c = input?.characters?.[roleKey] || {};
+  const name = cleanString(c.name);
+  if (!name) throw new Error(`Character ${roleKey} requires name`);
+
+  const head = [name];
+  if (Number.isFinite(c.age)) {
+    head.push(`${c.age}歲`);
+  } else if (cleanString(c.age)) {
+    const age = cleanString(c.age);
+    if (!/^\d+(?:\.\d+)?$/.test(age)) {
+      throw new Error(`Invalid normalized age for character ${roleKey}: use a number or unitless numeric string`);
+    }
+    head.push(`${age}歲`);
+  }
+  if (cleanString(c.gender)) head.push(cleanString(c.gender));
+  if (cleanString(c.identity)) head.push(cleanString(c.identity));
+
+  const lines = [`角色${roleKey}：${head.join('，')}。`];
+  if (cleanString(c.appearance)) lines.push(`外觀：${terminal(c.appearance)}`);
+  if (cleanString(c.speciesBody)) lines.push(`種族／特殊身體：${terminal(c.speciesBody)}`);
+
+  const remaining = remainingCapabilities(input, roleKey, covered);
+  if (remaining.length) {
+    const labels = remaining.map(id => {
+      if (!CAPABILITY_LABELS[id]) throw new Error(`Unknown capability id: ${id}`);
+      return CAPABILITY_LABELS[id];
+    });
+    lines.push(`幻想能力：${labels.join('、')}。`);
+  }
+
+  lines.push(...compilePersonality(c));
+
+  if (cleanString(c.supplement)) lines.push(`角色補充：${c.supplement}`);
+  return lines.join('\n');
+}
+
+function compileRelationship(rel) {
+  rel = rel || {};
+  const type = cleanString(rel.type);
+  const state = cleanString(rel.state);
+  const power = nonEmpty(rel.powerSources);
+  const tone = nonEmpty(rel.tones);
+  const supplement = cleanString(rel.supplement);
+
+  if (!type && !state && !power.length && !tone.length && !supplement) return '';
+
+  let out = '兩人關係：';
+  if (type || state) {
+    out += [type, state].filter(Boolean).join('，');
+    out += '。';
+  }
+  const tail = [];
+  if (power.length) tail.push(`權力來源包含${joinChinese(power)}`);
+  if (tone.length) tail.push(`關係氛圍偏${joinChinese(tone)}`);
+  if (tail.length) {
+    out += tail.join('；');
+    if (supplement && hasTerminalPunctuation(supplement)) {
+      // A punctuated free-text sentence stays verbatim and is not followed by another period.
+      out += `。${supplement}`;
+    } else {
+      if (supplement) out += `，${supplement}`;
+      out += '。';
+    }
+  } else if (supplement) {
+    // supplement-only relationship still receives exactly one terminal mark.
+    out += terminal(supplement);
+  }
+  return out;
+}
+
+function directionClause(selection, input) {
+  const { item, assignment } = selection;
+  const a = roleDisplayName(input, 'A');
+  const b = roleDisplayName(input, 'B');
+  if (assignment === 'llm' || !assignment || item.directionMode === 'none') return null;
+
+  if (item.directionMode === 'direction') {
+    if (assignment === 'A_to_B') return { key: `direction|A|B`, mode: 'direction', labels: [item.label], from: a, to: b };
+    if (assignment === 'B_to_A') return { key: `direction|B|A`, mode: 'direction', labels: [item.label], from: b, to: a };
+    if (assignment === 'both') return { key: 'direction|both', mode: 'bothDirection', labels: [item.label] };
+    throw new Error(`Invalid direction assignment for ${item.id}: ${assignment}`);
+  }
+
+  if (item.directionMode === 'subject') {
+    if (assignment === 'A') return { key: 'subject|A', mode: 'subject', labels: [item.label], subject: a };
+    if (assignment === 'B') return { key: 'subject|B', mode: 'subject', labels: [item.label], subject: b };
+    if (assignment === 'both') return { key: 'subject|both', mode: 'bothSubject', labels: [item.label] };
+    throw new Error(`Invalid subject assignment for ${item.id}: ${assignment}`);
+  }
+  return null;
+}
+
+function compileDirectionNote(playSelections, input) {
+  const grouped = new Map();
+  for (const selection of playSelections) {
+    const clause = directionClause(selection, input);
+    if (!clause) continue;
+    if (!grouped.has(clause.key)) grouped.set(clause.key, clause);
+    else grouped.get(clause.key).labels.push(...clause.labels);
+  }
+  if (!grouped.size) return '';
+
+  const clauses = [];
+  for (const group of grouped.values()) {
+    const labels = joinChinese(group.labels);
+    if (group.mode === 'direction') clauses.push(`${labels}希望由${group.from}對${group.to}進行`);
+    else if (group.mode === 'bothDirection') clauses.push(`${labels}是雙向的`);
+    else if (group.mode === 'subject') clauses.push(`${labels}以${group.subject}為主體`);
+    else if (group.mode === 'bothSubject') clauses.push(`${labels}以雙方為主體`);
+  }
+  return `其中${clauses.join('；')}。`;
+}
+
+function compileTask(input) {
+  const lengthId = cleanString(input?.task?.lengthId);
+  const orientationId = cleanString(input?.task?.contentOrientationId);
+  if (lengthId && !LENGTH_OPTIONS[lengthId]) throw new Error(`Unknown length option: ${lengthId}`);
+  if (orientationId && !CONTENT_ORIENTATION_OPTIONS[orientationId]) throw new Error(`Unknown content-orientation option: ${orientationId}`);
+  const lengthText = lengthId ? LENGTH_OPTIONS[lengthId].promptText : '';
+  const orientationText = orientationId ? CONTENT_ORIENTATION_OPTIONS[orientationId].promptText : '';
+  const slotLine = joinCommaSlots([lengthText, orientationText]);
+  const lines = [
+    '【任務】',
+    '寫一篇成人色情小說。所有角色均為成年人。',
+  ];
+  if (slotLine) lines.push(`${slotLine}。`);
+  lines.push('直接開始正文，不複述設定，不先列人物表。');
+  return lines.join('\n');
+}
+
+function compileStory(input, masterIndex, playSelections) {
+  const lines = ['【本篇】'];
+  const location = resolveItem(masterIndex, input?.scene?.locationId, 'location');
+  if (location) lines.push(`地點：${location.label}。`);
+
+  const situations = (input?.scene?.situationIds || []).map(id => resolveItem(masterIndex, id, 'situation')?.label).filter(Boolean);
+  if (situations.length) lines.push(`當前情境：${situations.join('、')}。`);
+
+  if (cleanString(input?.scene?.opening)) lines.push(`開場：${input.scene.opening}`);
+  if (cleanString(input?.scene?.direction)) lines.push(`希望的大方向：${input.scene.direction}`);
+
+  if (playSelections.length) {
+    if (lines.length > 1) lines.push('');
+    lines.push('本篇希望自然融入的元素（依故事需要取用，不必全部出現，也不需依序）：');
+    lines.push(...playSelections.map(({ item }) => item.label));
+    const note = compileDirectionNote(playSelections, input);
+    if (note) {
+      lines.push('');
+      lines.push(note);
+    }
+  }
+
+  const pacing = (input?.pacingIds || []).map(id => resolveItem(masterIndex, id, 'pacing')?.label).filter(Boolean);
+  if (pacing.length) {
+    lines.push('');
+    lines.push('節奏：');
+    lines.push(pacing.join('、'));
+  }
+
+  if (cleanString(input?.supplement)) {
+    lines.push('');
+    lines.push('自由補充：');
+    lines.push(input.supplement);
+  }
+
+  return lines.join('\n');
+}
+
+function compileCore() {
+  return ['【固定寫作原則】', ...SHARED_CORE_LINES].join('\n');
+}
+
+function validateMinimumInput(input) {
+  const hasA = Boolean(cleanString(input?.characters?.A?.name));
+  const hasB = Boolean(cleanString(input?.characters?.B?.name));
+  const hasWanted = Boolean(
+    (input?.plays || []).length ||
+    cleanString(input?.scene?.opening) ||
+    cleanString(input?.supplement)
+  );
+  return { ok: hasA && hasB && hasWanted, hasA, hasB, hasWanted };
+}
+
+function compilePrompt(input, masterItems) {
+  const minimum = validateMinimumInput(input);
+  if (!minimum.ok) {
+    const missing = [!minimum.hasA && '角色 A', !minimum.hasB && '角色 B', !minimum.hasWanted && '本篇想看什麼'].filter(Boolean);
+    throw new Error(`Missing minimum input: ${missing.join('、')}`);
+  }
+
+  const masterIndex = buildMasterIndex(masterItems);
+  const playSelections = normalizePlaySelections(input, masterIndex);
+  const covered = coveredCapabilityRoles(input, playSelections);
+
+  const roles = [
+    '【角色與關係】',
+    compileCharacter(input, 'A', masterIndex, covered),
+    '',
+    compileCharacter(input, 'B', masterIndex, covered),
+  ];
+  const relationship = compileRelationship(input.relationship);
+  if (relationship) roles.push('', relationship);
+
+  return [
+    compileTask(input),
+    roles.join('\n'),
+    compileStory(input, masterIndex, playSelections),
+    compileCore(),
+  ].join('\n\n');
+}
+
+
+const MASTER_OBJECT = JSON.parse(document.getElementById('masterData').textContent);
+const MASTER_ITEMS = MASTER_OBJECT.items;
+const PERSONALITY_VOCAB = {"coreTemperament":[{"label":"冷淡","polarityTags":["cool","restrained"]},{"label":"理性","polarityTags":["controlled","stable"]},{"label":"克制","polarityTags":["restrained","controlled"]},{"label":"寡言","polarityTags":["reserved","restrained"]},{"label":"溫和","polarityTags":["stable"]},{"label":"外向","polarityTags":["expressive"]},{"label":"直率","polarityTags":["direct","expressive"]},{"label":"強勢","polarityTags":["assertive"]},{"label":"敏感","polarityTags":["shaken"]},{"label":"自信","polarityTags":["assertive","stable"]},{"label":"虔誠","polarityTags":[]},{"label":"耐心","polarityTags":["stable","controlled"]},{"label":"疏離","polarityTags":["cool","reserved"]},{"label":"固執","polarityTags":["controlled"]}],"socialBehavior":[{"label":"愛逗人","polarityTags":["expressive"]},{"label":"有禮","polarityTags":[]},{"label":"疏離","polarityTags":["reserved"]},{"label":"親切","polarityTags":["expressive"]},{"label":"毒舌","polarityTags":["direct"]},{"label":"謹慎","polarityTags":["controlled"]},{"label":"觀察型","polarityTags":["reserved"]},{"label":"不擅交際","polarityTags":["reserved"]},{"label":"善於試探","polarityTags":["active"]},{"label":"公事公辦","polarityTags":["controlled"]}],"emotionalProcessing":[{"label":"習慣壓抑","polarityTags":["restrained"]},{"label":"容易害羞","polarityTags":["shaken"]},{"label":"被拆穿時沉默","polarityTags":["reserved","restrained"]},{"label":"容易惱羞","polarityTags":["shaken","expressive"]},{"label":"情緒外露","polarityTags":["expressive"]},{"label":"先分析再反應","polarityTags":["controlled"]},{"label":"會用玩笑帶過","polarityTags":["avoidant"]},{"label":"坦率承認","polarityTags":["direct","expressive"]},{"label":"不喜歡示弱","polarityTags":["restrained"]},{"label":"容易動搖","polarityTags":["shaken"]}],"actionTendency":[{"label":"主動","polarityTags":["active","assertive"]},{"label":"被動","polarityTags":["passive","yielding"]},{"label":"謹慎","polarityTags":["controlled"]},{"label":"果斷","polarityTags":["active","assertive"]},{"label":"先觀望","polarityTags":["passive"]},{"label":"直接行動","polarityTags":["direct","active"]},{"label":"避免正面衝突","polarityTags":["avoidant"]},{"label":"喜歡掌控節奏","polarityTags":["assertive","controlled"]},{"label":"慢半拍","polarityTags":["passive"]},{"label":"會主動收拾局面","polarityTags":["active","controlled"]}],"intimateInitiative":[{"label":"直接主動","surface":"會直接主動靠近","polarityTags":["active","direct","expressive"]},{"label":"等對方先動","surface":"通常等對方先動","polarityTags":["passive","yielding","restrained"]},{"label":"安靜主動","surface":"會安靜而直接地主動靠近","polarityTags":["active","restrained"]},{"label":"用話語試探","surface":"會先用話語試探","polarityTags":["active","expressive"]},{"label":"用行動表達","surface":"傾向直接用行動表達","polarityTags":["active","reserved"]},{"label":"慢慢引導","surface":"會慢慢引導對方","polarityTags":["active","controlled"]},{"label":"很少主動","surface":"很少主動跨線","polarityTags":["passive","restrained"]},{"label":"主動時很強勢","surface":"主動時表現得很強勢","polarityTags":["active","assertive"]}],"shakenReaction":[{"label":"變得更沉默","surface":"會變得更沉默","polarityTags":["reserved","restrained"]},{"label":"明顯失去從容","surface":"會明顯失去從容","polarityTags":["shaken","expressive"]},{"label":"變得更嘴硬","surface":"會變得更嘴硬","polarityTags":["avoidant","restrained"]},{"label":"明顯害羞","surface":"會明顯害羞","polarityTags":["shaken"]},{"label":"反而更強勢","surface":"會變得更強勢","polarityTags":["assertive"]},{"label":"行動變直接","surface":"行動會變得更直接","polarityTags":["direct","active"]},{"label":"需要短暫整理自己","surface":"會短暫停頓並重新整理自己","polarityTags":["controlled"]},{"label":"反應很難掩飾","surface":"反應會變得很難掩飾","polarityTags":["expressive","shaken"]}],"relationshipDynamic":[{"label":"喜歡主導","polarityTags":["assertive"]},{"label":"喜歡被引導","polarityTags":["yielding"]},{"label":"喜歡互相試探","polarityTags":[]},{"label":"喜歡平等往返","polarityTags":[]},{"label":"喜歡照顧對方","polarityTags":[]},{"label":"喜歡被照顧","polarityTags":[]},{"label":"喜歡挑釁與反挑釁","polarityTags":["expressive"]},{"label":"喜歡明確指令","polarityTags":[]}],"afterIntimacy":[{"label":"變得更安靜","polarityTags":["reserved"]},{"label":"默默靠近","polarityTags":["active","reserved"]},{"label":"主動照顧對方","polarityTags":["active"]},{"label":"需要獨處一下","polarityTags":["reserved"]},{"label":"恢復日常語氣","polarityTags":["controlled"]},{"label":"變得黏人","polarityTags":["expressive"]},{"label":"故作若無其事","polarityTags":["restrained"]},{"label":"直接談清楚","polarityTags":["direct","expressive"]}]};
+const CAPABILITY_OPTIONS = Object.entries(CAPABILITY_LABELS).map(([id,label])=>({id,label}));
+const SPECIES_PRESETS = ['人類','獸人','貓人','犬人','蛇人','惡魔','精靈','外神／古神','ABO','偽娘','扶他'];
+const RELATIONSHIP_TYPE_OPTIONS = ['戀人','曖昧','上下級','師生／師徒','信仰／侍奉','主從','宿敵','搭檔','舊識','契約關係'];
+const PLAY_CATEGORY_LABELS = {
+  power_control:'權力與主導', bondage_restriction:'束縛與限制', toys_devices:'玩具與器具', sensory_stimulation:'感官與刺激',
+  position_body_relation:'姿勢與身體關係', psychological_contrast:'心理／羞恥／反差', nonhuman_fantasy:'非人／幻想玩法'
+};
+const PLAY_CATEGORY_ORDER = ['power_control','bondage_restriction','toys_devices','sensory_stimulation','position_body_relation','psychological_contrast','nonhuman_fantasy'];
+const POSITION_BODY_ORDER = ['face_to_face_position','from_behind_position','riding_position','side_lying_position','standing_position','wall_pin','tabletop_position','lifted_position','height_difference','body_build_and_strength_difference','oral_sex','manual_genital_stimulation','breast_sex','thigh_sex','anal_sex','gravity_change'];
+const ROLE_STORE_KEY = 'adultNovelPromptGenerator.roles.v1';
+const TRAIT_LABELS = {
+  coreTemperament:'核心氣質', socialBehavior:'社交方式', emotionalProcessing:'情緒處理', actionTendency:'行動傾向',
+  intimateInitiative:'主動方式', shakenReaction:'動搖／失態反應', relationshipDynamic:'偏好的關係動態', afterIntimacy:'親密後狀態'
+};
+const GENERAL_TRAITS = ['coreTemperament','socialBehavior','emotionalProcessing','actionTendency'];
+const INTIMATE_TRAITS = ['intimateInitiative','shakenReaction','relationshipDynamic','afterIntimacy'];
+let currentPlayTab = 'power_control';
+let selectedPlays = new Map();
+let promptDirty = false;
+let roleLoadedIds = {A:null,B:null};
+
+const $ = (q,root=document)=>root.querySelector(q);
+const $$ = (q,root=document)=>[...root.querySelectorAll(q)];
+const byType = type => MASTER_ITEMS.filter(x=>x.type===type);
+const esc = s => String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+const splitList = value => String(value||'').split(/[、,，;；\n]+/).map(x=>x.trim()).filter(Boolean);
+const uid = ()=> (globalThis.crypto?.randomUUID?.() || `r_${Date.now()}_${Math.random().toString(36).slice(2)}`);
+
+function roleTemplate(k){
+  const dlPrefix = `trait-${k}`;
+  const traitRows = cats => cats.map(cat=>{
+    return `<div class="trait-group" data-trait-group="${cat}"><div class="trait-title"><span>${TRAIT_LABELS[cat]}</span><span class="trait-count" data-trait-count="${cat}">0</span></div><div class="tokens" data-trait-tokens="${cat}"></div><div class="trait-entry"><input type="text" data-trait-input="${cat}" placeholder="輸入後 Enter；也可自訂"><button type="button" class="trait-add" data-trait-add="${cat}" aria-label="加入">＋</button></div></div>`
+  }).join('');
+  const caps = CAPABILITY_OPTIONS.map(x=>`<label class="check-chip"><input type="checkbox" data-cap="${x.id}"><span>${x.label}</span></label>`).join('');
+  const species = SPECIES_PRESETS.map(x=>`<button type="button" class="preset" data-species="${esc(x)}">${esc(x)}</button>`).join('');
+  return `<div class="role-card" data-role="${k}">
+    <div class="role-head"><div><strong>角色 ${k}<span class="required">＊</span></strong><div class="role-name" data-role-summary="${k}">尚未命名</div></div><button class="btn small" type="button" data-clear-role="${k}">清空欄位</button></div>
+    <div class="role-body">
+      <div class="library-row"><select data-role-load="${k}"><option value="">從角色庫載入…</option></select><span class="actions"><button class="btn small" type="button" data-save-role="${k}">儲存角色</button><button class="btn small danger" type="button" data-delete-role="${k}">刪除</button></span></div>
+      <div class="grid2"><label class="field"><span>名稱<span class="required">＊</span></span><input type="text" data-r="${k}" data-f="name" placeholder="角色名稱"></label><label class="field"><span>成年年齡</span><input type="number" min="18" step="1" data-r="${k}" data-f="age" placeholder="例如 31"></label><label class="field"><span>性別</span><input type="text" data-r="${k}" data-f="gender" placeholder="例如 男性"></label><label class="field"><span>身分／職業</span><input type="text" data-r="${k}" data-f="identity" placeholder="例如 研究專案主管"></label></div>
+      <label class="field" style="margin-top:10px"><span>外觀</span><textarea data-r="${k}" data-f="appearance" placeholder="只寫會影響描寫的外觀特徵即可。"></textarea></label>
+      <details open><summary><span>一般性格</span><span class="subtle">建議最多 5 個</span></summary><div class="details-content">${traitRows(GENERAL_TRAITS)}</div></details>
+      <details open><summary><span>親密互動特徵</span><span class="subtle">建議最多 4 個</span></summary><div class="details-content">${traitRows(INTIMATE_TRAITS)}</div></details>
+      <details><summary><span>種族／特殊身體與幻想能力</span><span class="subtle" data-advanced-count="${k}">未填</span></summary><div class="details-content"><label class="field"><span>種族／特殊身體</span><textarea data-r="${k}" data-f="speciesBody" placeholder="例如：非人存在，可顯現觸肢等非人肢體。"></textarea></label><div class="preset-row">${species}</div><div class="field" style="margin-top:11px"><span>幻想能力</span><div class="cap-grid">${caps}</div></div></div></details>
+      <details><summary><span>角色補充</span><span class="subtle" data-supplement-count="${k}">未填</span></summary><div class="details-content"><textarea data-r="${k}" data-f="supplement" placeholder="例如：他很少主動談自己的感受，但會記住對方隨口提過的小事。"></textarea></div></details>
+    </div></div>`;
+}
+
+if(!$('#roleA').querySelector('[data-role="A"]')) $('#roleA').innerHTML=roleTemplate('A'); if(!$('#roleB').querySelector('[data-role="B"]')) $('#roleB').innerHTML=roleTemplate('B'); document.documentElement.classList.add('js-ready');
+
+function vocabTrait(category,label){
+  const found=(PERSONALITY_VOCAB[category]||[]).find(x=>x.label===label);
+  return found ? {label:found.label,category,polarityTags:[...(found.polarityTags||[])],...(found.surface?{surface:found.surface}:{})} : {label,category,polarityTags:[]};
+}
+function getTraitState(role,cat){
+  const box=$(`[data-role="${role}"]`); return JSON.parse(box.dataset[`traits${cat}`]||'[]');
+}
+function setTraitState(role,cat,arr){
+  const box=$(`[data-role="${role}"]`); box.dataset[`traits${cat}`]=JSON.stringify(arr); renderTraitTokens(role,cat); renderTraitPresetChips(role,cat);
+}
+function renderTraitTokens(role,cat){
+  const arr=getTraitState(role,cat), target=$(`[data-role="${role}"] [data-trait-tokens="${cat}"]`);
+  target.innerHTML=arr.map((t,i)=>`<span class="token">${esc(t.label)}<button type="button" data-remove-trait="${cat}" data-index="${i}">×</button></span>`).join('');
+  $(`[data-role="${role}"] [data-trait-count="${cat}"]`).textContent=arr.length;
+}
+function addTrait(role,cat){
+  const input=$(`[data-role="${role}"] [data-trait-input="${cat}"]`), label=input.value.trim(); if(!label)return;
+  const arr=getTraitState(role,cat); if(!arr.some(x=>x.label===label)) arr.push(vocabTrait(cat,label)); setTraitState(role,cat,arr); input.value=''; onFormChange();
+}
+
+function renderTraitPresetChips(role,cat){
+  const group=$(`[data-role="${role}"] [data-trait-group="${cat}"]`); if(!group)return;
+  let box=$('.trait-presets',group); if(!box){box=document.createElement('div');box.className='trait-presets';const entry=$('.trait-entry',group);entry.before(box);}
+  const vocab=PERSONALITY_VOCAB[cat]||[], selected=new Set(getTraitState(role,cat).map(x=>x.label));
+  const expanded=group.dataset.presetsExpanded==='1', shown=expanded?vocab:vocab.slice(0,8);
+  box.innerHTML=shown.map(x=>`<button type="button" class="trait-preset-chip" data-trait-preset="${cat}" data-label="${esc(x.label)}" aria-pressed="${selected.has(x.label)?'true':'false'}">${esc(x.label)}</button>`).join('')+
+    (vocab.length>8?`<button type="button" class="trait-more" data-trait-more="${cat}">${expanded?'收合':'更多'}</button>`:'');
+}
+function togglePresetTrait(role,cat,label){
+  const arr=getTraitState(role,cat), i=arr.findIndex(x=>x.label===label);
+  if(i>=0)arr.splice(i,1);else arr.push(vocabTrait(cat,label));
+  setTraitState(role,cat,arr);onFormChange();
+}
+function renderRelationshipTypeChips(){
+  const box=$('#relationshipTypeChips');if(!box)return;const current=$('#relType').value.trim();
+  box.innerHTML=RELATIONSHIP_TYPE_OPTIONS.map(label=>`<button type="button" class="relationship-type-chip" data-rel-type="${esc(label)}" aria-pressed="${current===label?'true':'false'}">${esc(label)}</button>`).join('');
+}
+
+function emptyPersonality(){return Object.fromEntries([...GENERAL_TRAITS,...INTIMATE_TRAITS].map(k=>[k,[]]));}
+function readRole(k){
+  const root=$(`[data-role="${k}"]`), val=f=>$(`[data-r="${k}"][data-f="${f}"]`)?.value??'';
+  const ageRaw=val('age').trim();
+  return {name:val('name').trim(),age:ageRaw?Number(ageRaw):'',gender:val('gender').trim(),identity:val('identity').trim(),appearance:val('appearance').trim(),speciesBody:val('speciesBody').trim(),fantasyCapabilities:$$('[data-cap]:checked',root).map(x=>x.dataset.cap),personality:Object.fromEntries([...GENERAL_TRAITS,...INTIMATE_TRAITS].map(cat=>[cat,getTraitState(k,cat)])),supplement:val('supplement')};
+}
+function writeRole(k,data={}){
+  const root=$(`[data-role="${k}"]`), p=data.personality||{};
+  for(const f of ['name','age','gender','identity','appearance','speciesBody','supplement']){const el=$(`[data-r="${k}"][data-f="${f}"]`); if(el)el.value=data[f]??'';}
+  $$('[data-cap]',root).forEach(x=>x.checked=(data.fantasyCapabilities||[]).includes(x.dataset.cap));
+  for(const cat of [...GENERAL_TRAITS,...INTIMATE_TRAITS]) setTraitState(k,cat,(p[cat]||[]).map(x=>typeof x==='string'?vocabTrait(cat,x):x));
+  updateRoleUI(k); onFormChange();
+}
+function clearRole(k){roleLoadedIds[k]=null;writeRole(k,{personality:emptyPersonality()}); refreshRoleLibrarySelects();}
+function updateRoleUI(k){
+  const r=readRole(k), root=$(`[data-role="${k}"]`); $('[data-role-summary]',root).textContent=r.name||'尚未命名';
+  const adv=(r.speciesBody?1:0)+r.fantasyCapabilities.length; $(`[data-advanced-count="${k}"]`).textContent=adv?`已填 ${adv}`:'未填';
+  $(`[data-supplement-count="${k}"]`).textContent=r.supplement.trim()?'已填':'未填';
+}
+
+let roleStoreFallback=[];
+function loadRoleStore(){try{const x=JSON.parse(localStorage.getItem(ROLE_STORE_KEY)||'[]');return Array.isArray(x)?x:[]}catch{return roleStoreFallback}}
+function saveRoleStore(arr){try{localStorage.setItem(ROLE_STORE_KEY,JSON.stringify(arr));roleStoreFallback=arr;return true}catch{roleStoreFallback=arr;return false}}
+function refreshRoleLibrarySelects(){
+  const store=loadRoleStore().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+  for(const k of ['A','B']){const sel=$(`[data-role-load="${k}"]`), current=roleLoadedIds[k]; sel.innerHTML='<option value="">從角色庫載入…</option>'+store.map(x=>`<option value="${x.id}" ${current===x.id?'selected':''}>${esc(x.data?.name||'未命名角色')}</option>`).join('');}
+}
+function saveCurrentRole(k){
+  const data=readRole(k); if(!data.name){alert(`請先填角色 ${k} 名稱。`);return} const age=data.age; if(age && age<18){alert('本工具只處理成年角色；年齡需為 18 歲以上。');return}
+  let store=loadRoleStore(), id=roleLoadedIds[k]; const now=Date.now();
+  if(id){const ix=store.findIndex(x=>x.id===id); if(ix>=0)store[ix]={...store[ix],data,updatedAt:now}; else{id=uid();store.push({id,data,updatedAt:now});}}
+  else{id=uid();store.push({id,data,updatedAt:now});}
+  roleLoadedIds[k]=id; const persisted=saveRoleStore(store); refreshRoleLibrarySelects(); flashStatus(persisted?`已儲存 ${data.name}`:`已暫存在目前頁面；此瀏覽器未提供 localStorage，請用匯出角色庫備份`);
+}
+function loadRole(k,id){const item=loadRoleStore().find(x=>x.id===id);if(!item)return;roleLoadedIds[k]=id;writeRole(k,item.data);refreshRoleLibrarySelects();}
+
+function deleteCurrentRole(k){
+  const id=roleLoadedIds[k]; if(!id){flashStatus('目前沒有載入已儲存角色');return}
+  const store=loadRoleStore(), item=store.find(x=>x.id===id); if(!item)return;
+  if(!confirm(`從角色庫刪除「${item.data?.name||'未命名角色'}」？`))return;
+  saveRoleStore(store.filter(x=>x.id!==id)); roleLoadedIds[k]=null; refreshRoleLibrarySelects(); flashStatus('已從角色庫刪除');
+}
+
+function exportRoleLibrary(){const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),roles:loadRoleStore()},null,2)],{type:'application/json'});downloadBlob(blob,'prompt-generator-role-library.json');}
+async function importRoleLibrary(file){
+  try{const obj=JSON.parse(await file.text()), incoming=Array.isArray(obj)?obj:obj.roles;if(!Array.isArray(incoming))throw new Error('格式不正確');
+    const existing=loadRoleStore(), map=new Map(existing.map(x=>[x.id,x])); for(const r of incoming){if(r?.data?.name){const id=r.id||uid();map.set(id,{id,data:r.data,updatedAt:r.updatedAt||Date.now()});}}
+    saveRoleStore([...map.values()]);refreshRoleLibrarySelects();flashStatus(`已匯入 ${incoming.length} 筆角色資料`);
+  }catch(e){alert(`角色庫匯入失敗：${e.message}`)}
+}
+
+function renderTaskControls(){
+  $('#orientationOptions').innerHTML=[['','不指定'],...Object.entries(CONTENT_ORIENTATION_OPTIONS).map(([id,x])=>[id,x.label])].map(([id,label])=>`<label><input type="radio" name="orientation" value="${id}" ${id===''?'checked':''}><span>${label}</span></label>`).join('');
+  $('#lengthOptions').innerHTML=[['','不指定'],...Object.entries(LENGTH_OPTIONS).map(([id,x])=>[id,x.label])].map(([id,label])=>`<label><input type="radio" name="length" value="${id}" ${id===''?'checked':''}><span>${label}</span></label>`).join('');
+}
+function renderScene(){
+  $('#location').insertAdjacentHTML('beforeend',byType('location').map(x=>`<option value="${x.id}">${esc(x.label)}</option>`).join(''));
+  $('#situations').innerHTML=byType('situation').map(x=>`<label class="check-chip"><input type="checkbox" value="${x.id}" data-situation><span>${esc(x.label)}</span></label>`).join('');
+}
+function renderPacing(){
+  $('#pacing').innerHTML=byType('pacing').map(x=>`<label class="check-chip"><input type="checkbox" value="${x.id}" data-pacing><span>${esc(x.label)}</span></label>`).join('');
+}
+renderTaskControls();renderScene();renderPacing();
+
+function assignmentOptions(item){
+  const a=readRole('A').name||'角色 A',b=readRole('B').name||'角色 B';
+  if(item.directionMode==='direction')return [['llm','讓模型決定'],['A_to_B',`${a} → ${b}`],['B_to_A',`${b} → ${a}`],['both','雙向']];
+  if(item.directionMode==='subject')return [['llm','讓模型決定'],['A',a],['B',b],['both','雙方']];
+  return [];
+}
+function getDisplayPlays(){
+  let items=byType('play'); const q=$('#playSearch').value.trim().toLowerCase(), supernatural=$('#supernaturalOnly').checked;
+  if(supernatural)items=items.filter(x=>(x.coversCapability||[]).length);
+  if(q)items=items.filter(x=>(x.label+' '+(x.description||'')).toLowerCase().includes(q));
+  else if(currentPlayTab==='selected')items=items.filter(x=>selectedPlays.has(x.id));
+  else items=items.filter(x=>x.category===currentPlayTab);
+  if(!q && currentPlayTab==='position_body_relation')items.sort((a,b)=>POSITION_BODY_ORDER.indexOf(a.id)-POSITION_BODY_ORDER.indexOf(b.id));
+  return items;
+}
+function renderPlayTabs(){
+  const tabs=[['selected',`已選 ${selectedPlays.size}`],...PLAY_CATEGORY_ORDER.map(id=>[id,PLAY_CATEGORY_LABELS[id]])];
+  $('#playTabs').innerHTML=tabs.map(([id,label])=>`<button type="button" class="tab ${currentPlayTab===id?'active':''}" data-tab="${id}">${label}</button>`).join('');
+}
+function renderPlays(){
+  renderPlayTabs();const items=getDisplayPlays(),box=$('#playList');
+  if(!items.length){box.innerHTML='<div class="empty" style="grid-column:1/-1">沒有符合條件的玩法。</div>';return}
+  box.innerHTML=items.map(item=>{
+    const selected=selectedPlays.has(item.id), assignment=selectedPlays.get(item.id)||'llm', opts=assignmentOptions(item).map(([v,l])=>`<option value="${v}" ${assignment===v?'selected':''}>${esc(l)}</option>`).join('');
+    return `<div class="play-item ${selected?'selected':''}" data-play-card="${item.id}"><div class="play-top"><input type="checkbox" data-play="${item.id}" ${selected?'checked':''}><div><div class="play-label">${esc(item.label)}</div><div class="play-desc">${esc(item.description||'')}</div></div></div><div class="play-meta"><div>${(item.coversCapability||[]).length?'<span class="badge">超自然</span>':''}</div>${item.directionMode!=='none'&&selected?`<select class="assignment" data-assignment="${item.id}">${opts}</select>`:''}</div></div>`;
+  }).join('');
+}
+function updatePlayCounts(){$('#playCount').textContent=`已選 ${selectedPlays.size}`;renderPlayTabs();}
+renderPlays();
+
+function readInput(){
+  return {task:{lengthId:$('input[name="length"]:checked')?.value||null,contentOrientationId:$('input[name="orientation"]:checked')?.value||null},characters:{A:readRole('A'),B:readRole('B')},relationship:{type:$('#relType').value.trim(),state:$('#relState').value.trim(),powerSources:splitList($('#relPower').value),tones:splitList($('#relTone').value),supplement:$('#relSupplement').value.trim()},scene:{locationId:$('#location').value||null,situationIds:$$('[data-situation]:checked').map(x=>x.value),opening:$('#opening').value.trim(),direction:$('#sceneDirection').value.trim()},plays:byType('play').filter(x=>selectedPlays.has(x.id)).map(x=>({id:x.id,assignment:selectedPlays.get(x.id)||'llm'})),pacingIds:$$('[data-pacing]:checked').map(x=>x.value),supplement:$('#storySupplement').value.trim()};
+}
+function uiValidation(){
+  const input=readInput(),m=validateMinimumInput(input),ageA=input.characters.A.age,ageB=input.characters.B.age;
+  const ageOkA=!ageA||ageA>=18,ageOkB=!ageB||ageB>=18; return {...m,ageOkA,ageOkB,ok:m.ok&&ageOkA&&ageOkB};
+}
+function updateValidation(){
+  const v=uiValidation(),missing=[];if(!v.hasA)missing.push('角色 A 名稱');if(!v.hasB)missing.push('角色 B 名稱');if(!v.hasWanted)missing.push('本篇想看什麼（玩法／開場／自由補充三選一）');if(!v.ageOkA)missing.push('角色 A 年齡需 ≥18');if(!v.ageOkB)missing.push('角色 B 年齡需 ≥18');
+  const box=$('#validationBox');box.className=`status-box ${v.ok?'ok':'warn'}`;box.innerHTML=v.ok?'✓ 已滿足最小必填，可以產生 Prompt。':`尚缺：<div class="missing-list">${missing.map(x=>`• ${esc(x)}`).join('<br>')}</div>`;$('#generate').disabled=!v.ok;
+}
+function updateCounts(){
+  const situations=$$('[data-situation]:checked').length,location=$('#location').value?1:0,dir=$('#sceneDirection').value.trim()?1:0;$('#sceneAdvancedCount').textContent=(situations+location+dir)?`已填 ${situations+location+dir}`:'未填';
+  const p=$$('[data-pacing]:checked').length;$('#pacingCount').textContent=`已選 ${p} / 3`;$('#supplementSummary').textContent=$('#storySupplement').value.trim()?'已填':'未填';
+  const lengthId=$('input[name="length"]:checked')?.value||'';$('#lengthSummary').textContent=lengthId?LENGTH_OPTIONS[lengthId].label:'不指定';
+}
+function refreshAssignmentLabels(){if($('#playSearch').value.trim()||currentPlayTab)renderPlays();}
+function onFormChange(){
+  if($('#output').value){promptDirty=true;$('#copyPrompt').disabled=true;$('#downloadPrompt').disabled=true;$('#outputState').textContent='設定已變更，請重新產生';}
+  for(const k of ['A','B'])updateRoleUI(k);updateValidation();updateCounts();refreshAssignmentLabels();renderRelationshipTypeChips();
+}
+
+function generatePrompt(){
+  $('#compileError').classList.add('hidden');try{const out=compilePrompt(readInput(),MASTER_ITEMS);$('#output').value=out;$('#outputChars').textContent=`${[...out].length} 字元`;$('#copyPrompt').disabled=false;$('#downloadPrompt').disabled=false;promptDirty=false;$('#outputState').textContent='已是最新設定';flashStatus('Prompt 已產生');}
+  catch(e){$('#compileError').textContent=e.message;$('#compileError').classList.remove('hidden');}
+}
+async function copyPrompt(){try{await navigator.clipboard.writeText($('#output').value);flashStatus('已複製 Prompt')}catch{ $('#output').select();document.execCommand('copy');flashStatus('已複製 Prompt')}}
+function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},0)}
+function downloadPrompt(){downloadBlob(new Blob([$('#output').value],{type:'text/plain;charset=utf-8'}),'prompt.txt')}
+let statusTimer;function flashStatus(msg){clearTimeout(statusTimer);$('#compileError').textContent=msg;$('#compileError').classList.remove('hidden');$('#compileError').style.color='var(--ok)';statusTimer=setTimeout(()=>{$('#compileError').classList.add('hidden');$('#compileError').style.color=''},1800)}
+
+function clearStory(){
+  for(const id of ['relType','relState','relPower','relTone','relSupplement','opening','sceneDirection','storySupplement'])$('#'+id).value='';$('#location').value='';$$('[data-situation],[data-pacing]').forEach(x=>x.checked=false);selectedPlays.clear();$('#playSearch').value='';$('#supernaturalOnly').checked=false;currentPlayTab='power_control';$('input[name="orientation"][value=""]').checked=true;$('input[name="length"][value=""]').checked=true;$('#output').value='';$('#copyPrompt').disabled=true;$('#downloadPrompt').disabled=true;$('#outputChars').textContent='0 字元';$('#outputState').textContent='尚未產生';promptDirty=false;renderPlays();onFormChange();
+}
+function clearAll(){if(!confirm('清空目前畫面？已儲存的角色庫不會被刪除。'))return;clearStory();clearRole('A');clearRole('B');}
+function swapRoles(){
+  const a=readRole('A'),b=readRole('B'),aid=roleLoadedIds.A,bid=roleLoadedIds.B;
+  for(const [id,assignment] of selectedPlays){const item=MASTER_ITEMS.find(x=>x.id===id);if(item?.directionMode==='direction'){if(assignment==='A_to_B')selectedPlays.set(id,'B_to_A');else if(assignment==='B_to_A')selectedPlays.set(id,'A_to_B')}else if(item?.directionMode==='subject'){if(assignment==='A')selectedPlays.set(id,'B');else if(assignment==='B')selectedPlays.set(id,'A')}}
+  writeRole('A',b);writeRole('B',a);roleLoadedIds={A:bid,B:aid};refreshRoleLibrarySelects();refreshAssignmentLabels();
+}
+function appendSpecies(k,text){const el=$(`[data-r="${k}"][data-f="speciesBody"]`),cur=el.value.trim(); if(!cur)el.value=text; else if(!cur.includes(text))el.value=cur.replace(/[。.]$/,'')+'、'+text;onFormChange();}
+function loadExample(){
+  writeRole('A',{name:'季衡',age:31,gender:'男性',identity:'研究專案主管',appearance:'黑髮，打理整齊，表情通常偏冷。',personality:{coreTemperament:[vocabTrait('coreTemperament','冷淡'),vocabTrait('coreTemperament','理性'),vocabTrait('coreTemperament','克制'),vocabTrait('coreTemperament','寡言')],socialBehavior:[],emotionalProcessing:[vocabTrait('emotionalProcessing','被拆穿時沉默')],actionTendency:[vocabTrait('actionTendency','先觀望')],intimateInitiative:[vocabTrait('intimateInitiative','等對方先動')],shakenReaction:[vocabTrait('shakenReaction','變得更沉默')],relationshipDynamic:[],afterIntimacy:[vocabTrait('afterIntimacy','默默靠近')]},fantasyCapabilities:[],speciesBody:'',supplement:''});
+  writeRole('B',{name:'林澄',age:29,gender:'女性',identity:'研究專案成員',appearance:'短髮，神情明亮，目光直接。',personality:{coreTemperament:[vocabTrait('coreTemperament','直率'),vocabTrait('coreTemperament','自信'),vocabTrait('coreTemperament','敏感')],socialBehavior:[vocabTrait('socialBehavior','愛逗人')],emotionalProcessing:[],actionTendency:[vocabTrait('actionTendency','直接行動')],intimateInitiative:[vocabTrait('intimateInitiative','用話語試探')],shakenReaction:[],relationshipDynamic:[vocabTrait('relationshipDynamic','喜歡互相試探')],afterIntimacy:[]},fantasyCapabilities:[],speciesBody:'',supplement:''});
+  $('#relType').value='上下級';$('#relState').value='已建立信任';$('#relPower').value='職務權限、知識差距';$('#relTone').value='調侃、相互試探';$('#opening').value='兩人剛完成一份困難報告，只剩他們留在辦公室。林澄察覺季衡明明受到影響，卻仍若無其事地整理文件。';$('#location').value='office';
+  const sit=$('[data-situation][value="late_night_overtime"]');if(sit)sit.checked=true;selectedPlays.clear();for(const [id,a] of [['call_out_bluff','B_to_A'],['close_whispering','B_to_A'],['command','A_to_B'],['edging','B_to_A'],['tabletop_position','A_to_B']])if(MASTER_ITEMS.some(x=>x.id===id))selectedPlays.set(id,a);for(const id of ['slow_burn','multiple_rounds']){const x=$(`[data-pacing][value="${id}"]`);if(x)x.checked=true}currentPlayTab='selected';renderPlays();onFormChange();
+}
+
+// event wiring
+for(const k of ['A','B']){
+  const root=$(`[data-role="${k}"]`);root.addEventListener('click',e=>{const presetTrait=e.target.closest('[data-trait-preset]');if(presetTrait){togglePresetTrait(k,presetTrait.dataset.traitPreset,presetTrait.dataset.label);return}const more=e.target.closest('[data-trait-more]');if(more){const group=more.closest('[data-trait-group]');group.dataset.presetsExpanded=group.dataset.presetsExpanded==='1'?'0':'1';renderTraitPresetChips(k,more.dataset.traitMore);return}const add=e.target.closest('[data-trait-add]');if(add){addTrait(k,add.dataset.traitAdd);return}const rem=e.target.closest('[data-remove-trait]');if(rem){const cat=rem.dataset.removeTrait,arr=getTraitState(k,cat);arr.splice(Number(rem.dataset.index),1);setTraitState(k,cat,arr);onFormChange();return}const clear=e.target.closest('[data-clear-role]');if(clear){clearRole(k);return}const save=e.target.closest('[data-save-role]');if(save){saveCurrentRole(k);return}const del=e.target.closest('[data-delete-role]');if(del){deleteCurrentRole(k);return}const preset=e.target.closest('[data-species]');if(preset){appendSpecies(k,preset.dataset.species);return}});
+  root.addEventListener('keydown',e=>{if(e.target.matches('[data-trait-input]')&&e.key==='Enter'){e.preventDefault();addTrait(k,e.target.dataset.traitInput)}});
+  root.addEventListener('change',e=>{if(e.target.matches('[data-role-load]'))loadRole(k,e.target.value);onFormChange()});root.addEventListener('input',onFormChange);
+}
+$('#relationshipTypeChips').onclick=e=>{const chip=e.target.closest('[data-rel-type]');if(!chip)return;const input=$('#relType');input.value=input.value.trim()===chip.dataset.relType?'':chip.dataset.relType;onFormChange();};
+$('#swapRoles').onclick=swapRoles;$('#exportRoles').onclick=exportRoleLibrary;$('#importRolesBtn').onclick=()=>$('#importRolesFile').click();$('#importRolesFile').onchange=e=>{if(e.target.files[0])importRoleLibrary(e.target.files[0]);e.target.value=''};
+$('#playTabs').onclick=e=>{const t=e.target.closest('[data-tab]');if(t){currentPlayTab=t.dataset.tab;renderPlays()}};
+$('#playList').onchange=e=>{if(e.target.matches('[data-play]')){const id=e.target.dataset.play;if(e.target.checked)selectedPlays.set(id,'llm');else selectedPlays.delete(id);renderPlays();updatePlayCounts();updateValidation();return}if(e.target.matches('[data-assignment]')){selectedPlays.set(e.target.dataset.assignment,e.target.value);onFormChange()}};
+$('#playSearch').oninput=renderPlays;$('#supernaturalOnly').onchange=renderPlays;
+$('#situations').onchange=e=>{if(!e.target.matches('[data-situation]'))return;const checked=$$('[data-situation]:checked');if(checked.length>=2)$$('[data-situation]:not(:checked)').forEach(x=>x.disabled=true);else $$('[data-situation]').forEach(x=>x.disabled=false);onFormChange()};
+$('#pacing').onchange=e=>{if(!e.target.matches('[data-pacing]'))return;const checked=$$('[data-pacing]:checked');if(checked.length>=3)$$('[data-pacing]:not(:checked)').forEach(x=>x.disabled=true);else $$('[data-pacing]').forEach(x=>x.disabled=false);onFormChange()};
+for(const id of ['relType','relState','relPower','relTone','relSupplement','opening','sceneDirection','storySupplement','location'])$('#'+id).addEventListener(id==='location'?'change':'input',onFormChange);
+$('#orientationOptions').onchange=onFormChange;$('#lengthOptions').onchange=onFormChange;$('#generate').onclick=generatePrompt;$('#copyPrompt').onclick=copyPrompt;$('#downloadPrompt').onclick=downloadPrompt;$('#clearStory').onclick=clearStory;$('#clearAll').onclick=clearAll;$('#loadExample').onclick=loadExample;
+
+refreshRoleLibrarySelects();for(const k of ['A','B'])for(const cat of [...GENERAL_TRAITS,...INTIMATE_TRAITS])setTraitState(k,cat,[]);onFormChange();
+
+
+// PWA shell: hosting/install/offline only. Does not change Generator or Compiler data.
+let deferredPwaInstall = null;
+function isStandalonePwa(){ return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true; }
+function updatePwaNetworkState(){
+  const el=document.getElementById('pwaNetworkState'); if(!el)return;
+  if(navigator.onLine){el.textContent=isStandalonePwa()?'App · 可離線':'線上 · 可安裝';el.classList.remove('offline');}
+  else{el.textContent='離線模式';el.classList.add('offline');}
+}
+window.addEventListener('online',updatePwaNetworkState);
+window.addEventListener('offline',updatePwaNetworkState);
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPwaInstall=e;const b=document.getElementById('pwaInstallBtn');if(b)b.classList.remove('hidden');});
+window.addEventListener('appinstalled',()=>{deferredPwaInstall=null;const b=document.getElementById('pwaInstallBtn');if(b)b.classList.add('hidden');updatePwaNetworkState();});
+const installBtn=document.getElementById('pwaInstallBtn');
+if(installBtn) installBtn.addEventListener('click',async()=>{
+  if(isStandalonePwa()) return;
+  if(deferredPwaInstall){
+    deferredPwaInstall.prompt();
+    try{await deferredPwaInstall.userChoice;}catch{}
+    deferredPwaInstall=null;
+    return;
+  }
+  const tip=document.getElementById('pwaInstallTip'); if(tip)tip.classList.remove('hidden');
+});
+const tipClose=document.getElementById('pwaTipClose'); if(tipClose)tipClose.addEventListener('click',()=>document.getElementById('pwaInstallTip')?.classList.add('hidden'));
+updatePwaNetworkState();
+if(isStandalonePwa() && installBtn) installBtn.classList.add('hidden');
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./service-worker.js',{scope:'./'}).catch(err=>console.warn('Service Worker registration failed:',err));
+  });
+}
+
+</script>
+</body></html>
