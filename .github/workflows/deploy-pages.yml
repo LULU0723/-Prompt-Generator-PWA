@@ -1,4 +1,4 @@
-name: Deploy Prompt Generator PWA to Pages
+name: Materialize and deploy Prompt Generator PWA
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Rebuild frozen PWA webroot
         run: |
@@ -42,14 +44,8 @@ jobs:
           rm -rf dist
           mkdir -p dist
           unzip -q site-rebuilt.zip -d dist
-          test -f dist/index.html
-          test -f dist/manifest.webmanifest
-          test -f dist/service-worker.js
-          test -f dist/icon-192.png
-          test -f dist/icon-512.png
-          test -f dist/apple-touch-icon.png
 
-      - name: Apply mobile vocabulary chip UI
+      - name: Apply V1.0.3 mobile vocabulary chip UI
         run: |
           python scripts/patch-mobile-chips.py
           grep -q 'V1.0.3 PWA' dist/index.html
@@ -57,6 +53,24 @@ jobs:
           grep -q 'relationshipTypeChips' dist/index.html
           ! grep -q '<datalist id="trait-' dist/index.html
           grep -q 'adult-prompt-generator-pwa-v1-0-3' dist/service-worker.js
+
+      - name: Materialize published webroot into main
+        run: |
+          cp dist/index.html ./index.html
+          cp dist/manifest.webmanifest ./manifest.webmanifest
+          cp dist/service-worker.js ./service-worker.js
+          cp dist/icon-192.png ./icon-192.png
+          cp dist/icon-512.png ./icon-512.png
+          cp dist/apple-touch-icon.png ./apple-touch-icon.png
+          touch .nojekyll
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html manifest.webmanifest service-worker.js icon-192.png icon-512.png apple-touch-icon.png .nojekyll
+          if ! git diff --cached --quiet; then
+            git commit -m "Materialize PWA V1.0.3 webroot"
+            git push origin main
+          fi
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
