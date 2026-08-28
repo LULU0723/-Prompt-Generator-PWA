@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -21,27 +21,17 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout source
+      - name: Checkout webroot
         uses: actions/checkout@v4
-        with:
-          ref: main
-
-      - name: Materialize V1.2.2 hotfix
-        run: |
-          python scripts/hotfix-v1_2_2.py
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html service-worker.js
-          if ! git diff --cached --quiet; then
-            git commit -m "Materialize PWA V1.2.2 quick-mode hotfix"
-            git push origin main
-          fi
 
       - name: Verify V1.2.2 quick prompt source
         run: |
           test -f index.html
           test -f manifest.webmanifest
           test -f service-worker.js
+          test -f icon-192.png
+          test -f icon-512.png
+          test -f apple-touch-icon.png
           grep -q 'V1.2.2 Quick Prompt Hotfix' index.html
           grep -q "let generatorMode = 'full';" index.html
           grep -q '玩法速貼' index.html
