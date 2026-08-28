@@ -1,4 +1,4 @@
-const CACHE_NAME = "adult-prompt-generator-pwa-v1-2-1";
+const CACHE_NAME = "adult-prompt-generator-pwa-v1-2-2";
 const APP_SHELL = [
   "./",
   "./index.html",
