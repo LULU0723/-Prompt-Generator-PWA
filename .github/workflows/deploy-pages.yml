@@ -1,4 +1,4 @@
-name: Build Prompt Generator PWA
+name: Deploy Prompt Generator PWA to Pages
 
 on:
   push:
@@ -6,52 +6,34 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
 
 concurrency:
-  group: gh-pages
+  group: pages
   cancel-in-progress: true
 
 jobs:
   deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout published webroot
         uses: actions/checkout@v4
+        with:
+          ref: gh-pages
 
-      - name: Rebuild PWA webroot
-        run: |
-          cat \
-            bundle/site.b64.00 \
-            bundle/site.b64.01a \
-            bundle/site.b64.01b \
-            bundle/site.b64.02 \
-            bundle/site.b64.03 \
-            bundle/site.b64.04 \
-            bundle/site.b64.05a \
-            bundle/site.b64.05b \
-            bundle/site.b64.06 \
-            bundle/site.b64.07 \
-            | base64 --decode > site-rebuilt.zip
-          unzip -tq site-rebuilt.zip
-          rm -rf dist /tmp/pages-dist
-          mkdir -p dist /tmp/pages-dist
-          unzip -q site-rebuilt.zip -d dist
-          test -f dist/index.html
-          test -f dist/manifest.webmanifest
-          test -f dist/service-worker.js
-          test -f dist/icon-192.png
-          test -f dist/icon-512.png
-          test -f dist/apple-touch-icon.png
-          cp -a dist/. /tmp/pages-dist/
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
 
-      - name: Publish gh-pages branch
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout --orphan gh-pages
-          git rm -rf .
-          cp -a /tmp/pages-dist/. .
-          git add -A
-          git commit -m "Deploy Prompt Generator PWA"
-          git push --force origin gh-pages
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
